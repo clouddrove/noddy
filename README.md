@@ -1,7 +1,7 @@
 <h1 align="center">
-    nobby (Help everyone using macOS) 
+    nobby  
 </h1>
-<p align="center" style="font-size: 1.2rem;">  MACOS command line tools for devops </p>
+<p align="center" style="font-size: 1.2rem;"> Help DevOps using  macOS  </p>
 
 <hr />
 

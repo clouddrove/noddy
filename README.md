@@ -1,11 +1,10 @@
 <h1 align="center">
-
+    nobby (Help everyone using macOS) 
 </h1>
 <p align="center" style="font-size: 1.2rem;">  MACOS command line tools for devops </p>
 
 <hr />
 
-    ![nobby](https://user-images.githubusercontent.com/4303310/40570030-cc9e1af2-6097-11e8-82b2-e8209891ad04.png)
 ---
 ## 👬 Contribution
 

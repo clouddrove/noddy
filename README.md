@@ -1,4 +1,9 @@
-## noddy
+<h1 align="center">
+    nobby 
+</h1>
+<p align="center" style="font-size: 1.2rem;">  MACOS command line tools for devops </p>
+
+<hr />
 
 ---
 ## 👬 Contribution

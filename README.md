@@ -1,7 +1,7 @@
 <h1 align="center">
     nobby  
 </h1>
-<p align="center" style="font-size: 1.2rem;"> Help DevOps using  macOS  </p>
+<p align="center" style="font-size: 1.2rem;"> Help DevOps using  macOS </p>
 
 <hr />
 

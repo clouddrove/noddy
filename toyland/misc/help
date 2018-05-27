@@ -1,0 +1,220 @@
+#!/bin/sh
+
+#--------------------------------------------------------------------
+# noddy script commands list - all commands
+#--------------------------------------------------------------------
+
+noddyCategories=(
+ansible
+bluetooth
+brew
+compress
+docker
+general
+git
+network
+performance
+search
+ssh
+terraform
+volume
+wifi
+xcode
+
+)
+
+function printInfo()
+{
+    echo "\n${WHITEBOLD} noddy  – OS X command line tools for devops"
+    echo "====================================================${NC}"
+}
+
+function printAdditionalHelp()
+{
+    echo "\nRun ${LIGHTBLUE}noddy help${NC} for full usage, ${LIGHTBLUE}noddy categories${NC} for categories list, or ${LIGHTBLUE}noddy {category}${NC} for usage related to {category}"
+    echo "${NC}\n"
+}
+
+function categoriesList()
+{
+    cats=${cats}$(printf "%s|" "${noddyCategories[@]}")
+    cats="${cats%?}"
+    echo "${cats}"
+}
+
+function usageList()
+{
+    case ${1} in
+        ansible)
+            echo "\n${WHITEBOLD}Ansible Utilities:"
+            echo "${LIGHTBLUE}noddy ansible:deploy ${GRAY}: Deploy ansible playbook"
+            echo "${NC}\n"
+            ;;
+        bluetooth)
+            echo "\n${WHITEBOLD}Bluetooth Utilities:"
+            echo "${LIGHTBLUE}noddy b:install${GRAY}:"
+            echo "${NC}\n"
+            ;;
+        brew)
+            echo "\n${WHITEBOLD}Homebrew Utilities:"
+            echo "${LIGHTBLUE}noddy brew:update${GRAY}: Install macOS software updates, update installed Ruby gems, Homebrew, npm, pip and their installed packages"
+            echo "${NC}\n"
+            ;;
+        compress)
+            echo "\n${WHITEBOLD}Compress Utilities:"
+            echo "${LIGHTBLUE}noddy zip:extract ${LIGHTGREEN}X${GRAY}: Extract Zip file to current folder - ${LIGHTGREEN}X = Zip file to extract"
+            echo "${LIGHTBLUE}noddy gzip:compress ${LIGHTGREEN}X${GRAY}: Compress current file using Gzip - ${LIGHTGREEN}X = File to compress"
+            echo "${LIGHTBLUE}noddy gzip:extract ${LIGHTGREEN}X${GRAY}: Extract Gzip file to current folder - ${LIGHTGREEN}X = Gzip file to extract"
+            echo "${LIGHTBLUE}noddy tar:compress ${LIGHTGREEN}X${GRAY}: Compress X file/directory using tar with progress indicator - ${LIGHTGREEN}X = File or directory"
+            echo "${LIGHTBLUE}noddy tar:extract ${LIGHTGREEN}X${GRAY}: Extract tar file to current folder - ${LIGHTGREEN}X = Tar file to extract"
+            ;;
+        docker)
+            echo "\n${WHITEBOLD}Docker Utilities:"
+            echo "${LIGHTBLUE}noddy d:install${GRAY}:"
+            echo "${NC}\n"
+            ;;
+        general)
+            echo "\n${WHITEBOLD}General Utilities:"
+            echo "${LIGHTBLUE}noddy update${GRAY}: Install OS X software updates, update installed Ruby gems, Homebrew, npm and their installed packages"
+            echo "${LIGHTBLUE}noddy upgrade${GRAY}: Upgrade noddy  to the latest version"
+            echo "${LIGHTBLUE}noddy uninstall${GRAY}: Uninstall noddy "
+            echo "${LIGHTBLUE}noddy lock${GRAY}: Lock"
+            echo "${LIGHTBLUE}noddy restart${GRAY}: Restart OS X"
+            echo "${LIGHTBLUE}noddy sleep${GRAY}: Sleep mode"
+            echo "${LIGHTBLUE}noddy shutdown${GRAY}: Shutdown"
+            echo "${LIGHTBLUE}noddy presentation${GRAY}: Prepare MAC for presentation: minimize all apps, close browsers, send files from desktop and downloads to trash and set not disturb mode"
+            echo "${LIGHTBLUE}noddy time${GRAY}: Show clock at top right position in Terminal/iTerm"
+            echo "${LIGHTBLUE}noddy uptime${GRAY}: Get the time since last restart"
+            echo "${LIGHTBLUE}noddy screensaver${GRAY}: Start screensaver"
+            echo "${LIGHTBLUE}noddy folders:list${GRAY}: List folders in current directory with their current size"
+            echo "${LIGHTBLUE}noddy folder:size${GRAY}: Calculate current folder size"
+            echo "${LIGHTBLUE}noddy folders:remove-empty${GRAY}: Remove empty subdirectories"
+            echo "${LIGHTBLUE}noddy apps:close-all${GRAY}: Close all opened apps"
+            echo "${LIGHTBLUE}noddy apps:app-store${GRAY}: Get list of installed apps from App Store"
+            echo "${LIGHTBLUE}noddy eject-all${GRAY}: Eject all mounted volumes and disks"
+            echo "${LIGHTBLUE}noddy battery${GRAY}: Get battery information"
+            echo "${LIGHTBLUE}noddy info${GRAY}: Get OS X version information"
+            echo "${LIGHTBLUE}noddy find:text ${LIGHTGREEN}X${GRAY}: Find exact phrase recursively inside directory - ${LIGHTGREEN}X = Text string"
+            echo "${LIGHTBLUE}noddy find:biggest-files ${GRAY}: Find biggest files inside directory"
+            echo "${LIGHTBLUE}noddy find:biggest-directories ${GRAY}: Find biggest directories inside directory"
+            echo "${NC}\n"
+            ;;
+        git)
+            echo "\n${WHITEBOLD}Git Utilities:"
+            echo "${LIGHTBLUE}noddy git:config${GRAY}: Display local Git configuration "
+            echo "${LIGHTBLUE}noddy git:open${GRAY}: Open current repository on Github "
+            echo "${LIGHTBLUE}noddy git:create:branch${GRAY}: Create branch based on current branch "
+            echo "${LIGHTBLUE}noddy git:branches:date${GRAY}: Get last update date for all branches in current project "
+            echo "${LIGHTBLUE}noddy git:undo-commit${GRAY}: Undo latest commit "
+            echo "${LIGHTBLUE}noddy git:log${GRAY}: See latest commits IDs and titles for current branch "
+            echo "${LIGHTBLUE}noddy git:branch${GRAY}: See all branches "
+            echo "${LIGHTBLUE}noddy git:branch:rename${GRAY}: Rename Git branch "
+            echo "${LIGHTBLUE}noddy git:branch:remove-local${GRAY}: Remove local Git branch "
+            echo "${LIGHTBLUE}noddy git:branch:remove-remote${GRAY}: Remove local and remote Git branch "
+            echo "${LIGHTBLUE}noddy git:remove${GRAY}: Remove Git from current project "
+            echo "${LIGHTBLUE}noddy git:branch${GRAY}: See all branches "
+            echo "${LIGHTBLUE}noddy git:config${GRAY}: Check Git settings "
+            echo "${LIGHTBLUE}noddy git:add-removed${GRAY}: Add removed files to staged files "
+            echo "${LIGHTBLUE}noddy git:size${GRAY}: Get size for current Git repository "
+            echo "${NC}\n"
+            ;;
+            ide)
+            ;;
+            itunes)
+            ;;
+        network)
+            echo "\n${WHITEBOLD}Network Utilities:"
+            echo "${LIGHTBLUE}noddy speedtest${GRAY}: Internet connection speed test "
+            echo "${LIGHTBLUE}noddy speedtest:infinite${GRAY}: Run internet speed test each 5 minutes "
+            echo "${LIGHTBLUE}noddy ports${GRAY}: List of used ports "
+            echo "${LIGHTBLUE}noddy ip:local${GRAY}: Get local IP address "
+            echo "${LIGHTBLUE}noddy ip:public${GRAY}: Get public IP address "
+            echo "${LIGHTBLUE}noddy dhcp:renew${GRAY}: Renew DHCP Lease "
+            echo "${LIGHTBLUE}noddy dns:clear${GRAY}: Clear DNS Cache "
+            echo "${NC}\n"
+            ;;
+        performance)
+            echo "\n${WHITEBOLD}Performance and maintenance Utilities:"
+            echo "${LIGHTBLUE}noddy system${GRAY}: Show system information to review mac performance "
+            echo "${LIGHTBLUE}noddy temp${GRAY}: Show temperature, fan and battery statistics "
+            echo "${LIGHTBLUE}noddy memory${GRAY}: See memory usage sorted by memory consumption "
+            echo "${LIGHTBLUE}noddy trash:empty${GRAY}: Empty trash"
+            echo "${LIGHTBLUE}noddy trash:size${GRAY}: Calculate trash size"
+            echo "${LIGHTBLUE}noddy desktop:cleanup${GRAY}: Remove all files and directories from the Desktop directory"
+            echo "${LIGHTBLUE}noddy downloads:cleanup${GRAY}: Remove all files and directories from the Downloads directory"
+            echo "${NC}\n"
+            ;;
+        search)
+            echo "\n${WHITEBOLD}Search Utilities:"
+            echo "${LIGHTBLUE}noddy find:recent ${LIGHTGREEN}X${GRAY}: Find files modified in the last N minutes - ${LIGHTGREEN}X = number of minutes "
+            echo "${LIGHTBLUE}noddy search:replace ${LIGHTGREEN}X${GRAY}: Search and replace string in file - ${LIGHTGREEN}X = File to perform the search and replace operation"
+            echo "${NC}\n"
+            ;;
+        ssh)
+            echo "\n${WHITEBOLD}SSH Utilities:"
+            echo "${LIGHTBLUE}noddy ssh:download-file ${LIGHTGREEN}X${GRAY}: Download file from remote server through SSH - X = Path of the remote file to download "
+            echo "${LIGHTBLUE}noddy ssh:download-folder ${LIGHTGREEN}X${GRAY}: Download entire folder from remote server through SSH - X = Path of the remote folder to download "
+            echo "${LIGHTBLUE}noddy ssh:download-database ${LIGHTGREEN}X${GRAY}: Download database from remote server through SSH - X = Name of the database to download "
+            echo "${LIGHTBLUE}noddy ssh:sync:local ${LIGHTGREEN}X${GRAY}: Sync local folder with remote folder using rsync through SSH (download remote folder to local folder)"
+            echo "${LIGHTBLUE}noddy ssh:sync:remote ${LIGHTGREEN}X${GRAY}: Path of the remote folder to sync from local folder (upload local folder to remote folder) "
+            echo "${LIGHTBLUE}noddy ssh:upload ${LIGHTGREEN}X${GRAY}: Upload file to remote server through SSH - X = Path of the file to upload to the remote server "
+            echo "${LIGHTBLUE}noddy ssh:public-key ${LIGHTGREEN}X${GRAY}: Get public SSH key for local machine "
+            echo "${NC}\n"
+            ;;
+        tf)
+            echo "\n${WHITEBOLD}Terraform Utilities:"
+            echo "${LIGHTBLUE}noddy tf:p ${LIGHTGREEN}X${GRAY}: Terraform plan"
+            echo "${NC}\n"
+            ;;
+        volume)
+            echo "\n${WHITEBOLD}Volume Utilities:"
+            echo "${LIGHTBLUE}noddy volume${GRAY}: Get the volume from the terminal"
+            echo "${LIGHTBLUE}noddy volume ${LIGHTGREEN}X${GRAY}: Set the volume from the terminal - ${LIGHTGREEN}X = Level (0-100)"
+            echo "${LIGHTBLUE}noddy volume:mute${GRAY}: Mute volume"
+            echo "${LIGHTBLUE}noddy volume:unmute${GRAY}: Unmute volume"
+            echo "${LIGHTBLUE}noddy volume:ismute${GRAY}: Check if the volume is muted or not"
+            ;;
+        wifi)
+            echo "\n${WHITEBOLD}Wifi Utilities:"
+            echo "${LIGHTBLUE}noddy wifi:status${GRAY}:"
+            echo "${NC}\n"
+            ;;
+        xcode)
+            echo "\n${WHITEBOLD}Xcode Utilities:"
+            echo "${LIGHTBLUE}noddy xcode:cleanup${GRAY}: Cleanup XCode files to free up hard disk space"
+            echo "${NC}\n"
+            ;;
+    esac
+
+}
+
+
+case ${fn} in
+    "list"|"help"|"usage")
+        echo "$(printInfo)"
+        for c in ${noddyCategories[@]}
+        do
+            echo "$(usageList ${c})"
+        done
+        echo "$(printAdditionalHelp)"
+        ;;
+    "categories")
+        echo "$(printInfo)"
+        echo "\n${WHITEBOLD}noddy  Categories: ${NC}\n"
+        for c in "${noddyCategories[@]}"
+        do
+            echo "${WHITEBOLD} >\t$c ${NC}"
+        done
+        echo "$(printAdditionalHelp)"
+        ;;
+esac
+
+for c in "${noddyCategories[@]}"
+do
+    if [ "${c}" = "${fn}" ]; then
+        echo "$(printInfo)"
+        echo "\n${WHITEBOLD}Usage for 'noddy ${c}'"
+        echo "$(usageList ${c})"
+        break
+    fi
+done

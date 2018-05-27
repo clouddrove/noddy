@@ -1,0 +1,85 @@
+#!/bin/sh
+
+#--------------------------------------------------------------------
+# Search Utilities
+#--------------------------------------------------------------------
+
+case "$fn" in
+    
+    # Find files modified in the last N minutes
+    "find:recent")
+        
+        echo "Searching for files modified in the last "$firstParameter" minutes..."
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}sudo find / -mmin ${GRAY}${firstParameter}${GREEN} -type f\n\n${NC}"
+        fi
+        sudo find / -mmin $firstParameter -type f
+    ;;
+    
+    
+    # Find duplicated files
+    "find:duplicated")
+        
+        # Check if brew install fdupes is installed brew install fdupes
+        if [ ! -f /usr/local/bin/fdupes ]; then
+            echo "${RED}fdupes not found ${NC}- ${GREEN}Installing dependency...\n\n${NC}"
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}brew install fdupes\n\n${NC}"
+            fi
+            brew install fdupes
+            echo "Searching for duplicated files in current directory and subdirectories..."
+            fdupes -r .
+            
+        else
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}fdupes -r .\n\n${NC}"
+            fi
+            echo "Searching for duplicated files in current directory and subdirectories..."
+            fdupes -r .
+        fi
+    ;;
+    
+    # Find text in current directory
+    "find:text")
+        
+        if [ ! -z "$allParameters" -a "$allParameters" != " " ]; then
+            echo "Please enter the extension to search (i.e.: csv): "
+            
+            read extension
+            
+            if [ ! -z "$extension" -a "$extension" != " " ]; then
+                
+                if [ "$echocommand" == "true" ]; then
+                    echo "${GREEN}find . -iname '*.${GRAY}${extension}${GREEN}' | xargs grep -in --color '${GRAY}${allParameters}${GREEN}'${NC}"
+                fi
+                echo "\nRecursively find '"$allParameters"' inside directory..."
+                find . -iname "*.$extension" | xargs grep -in --color "$allParameters"
+                
+            else
+                echo "Please introduce the extension of the files to search. E.g: csv"
+            fi
+        else
+            echo "Please introduce text to search. E.g:"
+            echo "mac find:text Sample Search Text"
+        fi
+    ;;
+    
+    
+    # Find biggest files in current directory
+    "find:biggest-files")
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}find . -type f -print0 | xargs -0 du | sort -n | tail -10 | cut -f2 | xargs -I{} du -sh {}${NC}"
+        fi
+        find . -type f -print0 | xargs -0 du | sort -n | tail -10 | cut -f2 | xargs -I{} du -sh {}
+    ;;
+    
+    
+    # Find biggest directories in current directory
+    "find:biggest-directories")
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}find . -type d -print0 | xargs -0 du | sort -n | tail -10 | cut -f2 | xargs -I{} du -sh {}${NC}"
+        fi
+        find . -type d -print0 | xargs -0 du | sort -n | tail -10 | cut -f2 | xargs -I{} du -sh {}
+    ;;
+    
+esac

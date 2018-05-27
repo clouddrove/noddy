@@ -1,0 +1,151 @@
+#!/bin/sh
+
+# Colors
+GREEN='\033[0;32m'
+LIGHTGREEN='\033[1;32m'
+NC='\033[1;37m'
+LIGHTBLUE='\033[01;34m'
+NC='\033[0m' # No Color
+
+# In directory
+PACKAGE_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+main() {
+
+    echo "${LIGHTBLUE}================================================"
+    echo " noddy  Installer"
+    echo "================================================${NC}\n"
+
+    git clone https://github.com/anmolnagpal/toyland.git --depth 1 && cd toyland
+
+    printf "${LIGHTGREEN}"
+    read -r -p "Would you like noddy to show you the commands that are run on each mac command? (Yes / No)" response
+    case $response in
+        [yY][eE][sS]|[yY])
+            LC_CTYPE=C sed -i'' -e 's#echocommand="false"#echocommand="true"#g' "$PACKAGE_DIRECTORY/toyland/noddy"
+        ;;
+        *)
+        ;;
+    esac
+    printf "${NC}"
+
+    echo "${LIGHTGREEN}Please enter your favourite text editor (by entering the command that opens your favourite editor. i.e: nano):"
+    echo "${NC}Press enter without any value to keep default: vi"
+    read pref_editor
+    if [ ! -z "$pref_editor" -a "$pref_editor" != " " ]; then
+        LC_CTYPE=C sed -i'' -e 's#pref_editor="vi"#pref_editor="${pref_Editor}"#g' "$PACKAGE_DIRECTORY/toyland/noddy"
+    fi
+
+    if [ ! -d /usr/local/bin ]; then
+        echo "bin not found"
+        {
+            echo "creating bin directory..."
+            mkdir -p /usr/local/bin
+            } || {
+            echo "error in creating bin directory"
+            exit 1
+        }
+    fi
+
+    cp "$PACKAGE_DIRECTORY/toyland/noddy" /usr/local/bin/noddy
+    cp -r "$PACKAGE_DIRECTORY/toyland/noddy/" /usr/local/bin/noddy
+    chmod -R +x /usr/local/bin/noddy/*
+
+    if [ ! -f /usr/local/bin/brew ]; then
+        echo "Installing homebrew..."
+        echo "${GREEN}/usr/bin/ruby -e '\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)'\n${NC}"
+        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    fi
+
+    if [ ! -f /usr/local/bin/git ]; then
+        echo "Installing Git..."
+        echo "${GREEN}brew install git\n${NC}"
+        brew install git
+    fi
+
+    if [ ! -f /usr/local/bin/pv ]; then
+        echo "Installing pv (Pipe Viewer)..."
+        echo "${GREEN}brew install pv\n${NC}"
+        brew install pv
+    fi
+
+    if ! which node > /dev/null; then
+        echo "Installing node..."
+        echo "${GREEN}brew install node\n${NC}"
+        brew install node
+    fi
+
+    if [ ! -f /usr/local/bin/python ]; then
+        echo "Installing Python..."
+        echo "${GREEN}brew install python\n${NC}"
+        brew install python
+    fi
+
+    if [ ! -f /usr/local/bin/fdupes ]; then
+        echo "Installing fdupes..."
+        echo "${GREEN}brew install fdupes\n\n${NC}"
+        brew install fdupes
+    fi
+
+    if [ ! -f /usr/local/bin/wget ]; then
+        echo "Installing wget..."
+        printf "${GREEN}brew install wget\n${NC}"
+        brew install wget
+    fi
+
+    if [ ! -f /usr/local/bin/composer.phar ]; then
+        echo "Installing composer..."
+        echo "${GREEN}curl -sS https://getcomposer.org/installer | php\n${NC}"
+        curl -sS https://getcomposer.org/installer | php
+        echo "${GREEN}sudo mv composer.phar /usr/local/bin/\n${NC}"
+        sudo mv composer.phar /usr/local/bin/composer
+    fi
+
+    if [ ! -f /usr/local/bin/glances ]; then
+        printf "${LIGHTGREEN}"
+        read -r -p "Would you like to install Glances to access advanced information about the system (https://github.com/nicolargo/glances)? (Yes / No)" response
+        case $response in
+            [yY][eE][sS]|[yY])
+                echo "Installing Glances (https://github.com/nicolargo/glances)..."
+                echo "${GREEN}pip install glances\n${NC}"
+                pip install glances
+            ;;
+            *)
+            ;;
+        esac
+        printf "${NC}"
+    fi
+
+    if [ ! -f /usr/local/bin/speedtest-cli ]; then
+        printf "${LIGHTGREEN}"
+        read -r -p "Would you like to install Fast CLI to run internet speed tests from your command line (https://github.com/sindresorhus/fast-cli)? (Yes / No)" response
+        case $response in
+            [yY][eE][sS]|[yY])
+                echo "Installing Fast CLI (https://github.com/sindresorhus/fast-cli)..."
+                echo "${GREEN}npm install --global fast-cli\n${NC}"
+                npm install --global fast-cli
+            ;;
+            *)
+            ;;
+        esac
+        printf "${NC}"
+    fi
+
+    if [ ! -f /usr/local/bin/istats ]; then
+        printf "${LIGHTGREEN}"
+        read -r -p "Would you like to install iStats access information about your Mac temperature and fan speed? (Yes / No)" response
+        case $response in
+            [yY][eE][sS]|[yY])
+                echo "Installing iStats..."
+                echo "${GREEN}sudo gem install iStats -n/usr/local/bin\n\n${NC}"
+                sudo gem install iStats -n/usr/local/bin
+            ;;
+            *)
+            ;;
+        esac
+        printf "${NC}"
+    fi
+
+}
+
+main

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+main() {
+
+    echo "Upgrading noddy ..."
+    rm /usr/local/bin/noddy
+    rm -rf /usr/local/bin/toyland
+    if [ -d ~/Downloads/toyland-update/ ]; then
+        rm -rf ~/Downloads/toyland-update/
+    fi
+    mkdir ~/Downloads/toyland-update/ && cd ~/Downloads/toyland-update/
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/anmolnagpal/toyland/master/toyland/tools/install)" && cd -
+    echo "${GREEN}noddy  has been updated to the latest version\n${NC}"
+
+}
+
+main

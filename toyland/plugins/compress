@@ -1,0 +1,87 @@
+#!/bin/sh
+
+#--------------------------------------------------------------------
+# Compress Utilities
+#--------------------------------------------------------------------
+case "$fn" in
+    # Extract Zip file
+    "zip:extract")
+
+        if [ ! -z "$firstParameter" -a "$firstParameter" != " " ]; then
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}unzip ${GRAY}${firstParameter}\n\n${NC}"
+            fi
+            unzip $firstParameter
+        else
+            echo "Please specify the Zip file to extract."
+            echo "E.g.: zip:extract sample_file.zip"
+        fi
+    ;;
+
+
+    # Compress Gzip file
+    "gzip:compress")
+
+        if [ ! -z "$firstParameter" -a "$firstParameter" != " " ]; then
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}gzip ${GRAY}${firstParameter}\n\n${NC}"
+            fi
+            gzip $firstParameter
+        else
+            echo "Please specify the file to compress."
+            echo "E.g.: gzip:compress sample_file"
+        fi
+    ;;
+
+
+    # Extract Gzip file
+    "gzip:extract")
+
+        if [ ! -z "$firstParameter" -a "$firstParameter" != " " ]; then
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}gzip -d ${GRAY}${firstParameter}\n\n${NC}"
+            fi
+            gzip -d $firstParameter
+        else
+            echo "Please specify the Gzip file to extract."
+            echo "E.g.: gzip:extract sample_file.gz"
+        fi
+    ;;
+
+
+    # Extract tar file
+    "tar:extract")
+
+        if [ ! -z "$firstParameter" -a "$firstParameter" != " " ]; then
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}tar -xvzf ${GRAY}${firstParameter}\n\n${NC}"
+            fi
+            tar -xvzf $firstParameter
+        else
+            echo "Please specify the tar file to extract."
+            echo "E.g.: tar:extract sample_file.tgz"
+	    fi
+    ;;
+
+
+    # Compress file/folder using TAR with progress indicator
+    "tar:compress")
+        echo "Please enter the filename to save the .tgz file: "
+
+        if [ ! -z "$firstParameter" -a "$firstParameter" != " " ]; then
+            read filename
+
+            if [ ! -z "$filename" -a "$filename" != " " ]; then
+                if [ "$echocommand" == "true" ]; then
+                    echo "${GREEN}tar -czf${GRAY}: ${firstParameter}${GREEN}  | (pv -p --timer --rate --bytes > '${GRAY}${filename}${GREEN}'.tgz)\n\n${NC}"
+                fi
+                tar -czf - $firstParameter | (pv -p --timer --rate --bytes > "$filename".tgz)
+            else
+                "Please specify the file name"
+            fi
+        else
+            echo "Please specify the folder or directory to compress."
+            echo "E.g.: tar:compress foldername"
+        fi
+    ;;
+esac

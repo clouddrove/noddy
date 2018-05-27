@@ -1,0 +1,64 @@
+#!/bin/sh
+
+#--------------------------------------------------------------------
+# Docker Utilities
+#--------------------------------------------------------------------
+case "$fn" in
+    "docker:list")
+        echo "Showing running containers..."
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}docker ps;\n${NC}"
+        fi
+        docker ps -a;
+    ;;
+    "docker:images")
+        echo "Showing docker images..."
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}show docker images;\n${NC}"
+        fi
+        docker images;
+    ;;
+    "docker:remove-images")
+        echo "Remove docker images..."
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}remove docker images;\n${NC}"
+        fi
+        docker rmi $(docker images -a -q)
+    ;;
+    "docker:stop")
+        echo "Stop docker container..."
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}stop docker container ;\n${NC}"
+        fi
+        docker stop $(docker ps -a -q)
+    ;;
+    "docker:remove")
+        echo "Remove docker container..."
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}remove docker container;\n${NC}"
+        fi
+        docker rm $(docker ps -a -q)
+    ;;
+    "docker:prune")
+        echo "Remove unused docker data..."
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}docker system prune;\n${NC}"
+        fi
+        docker system prune;
+    ;;
+    "docker:start")
+        echo "Start docker machine..."
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}docker machien start Dev;\n${NC}"
+        fi
+        docker-machine start dev;
+        eval "$(docker-machine env dev)"
+    ;;
+    "docker:machine-restart")
+        echo "Restart docker machine..."
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}docker machien restart Dev;\n${NC}"
+        fi
+        docker-machine restart dev;
+    ;;
+esac

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+main() {
+
+    echo "Uninstalling noddy ..."
+    rm /usr/local/bin/noddy
+    rm -rf /usr/local/bin/noddy
+    echo "${GREEN}noddy  has been uninstalled\n${NC}"
+
+}
+
+main

@@ -1,0 +1,223 @@
+#!/bin/sh
+###########################################################################
+#  mac CLI (mac command line tools) - macOS command line tools for DevOps
+###########################################################################
+
+# Version: 1.0
+# Date: June 13, 2017
+# Author: Anmol Nagpal
+#
+# Collection of useful functions to automate macOS common tasks
+#
+###########################################################################
+
+# Mac CLI directory
+MAC="$(dirname "$0")"
+
+#--------------------------------------------------------------------
+# Configuration
+#--------------------------------------------------------------------
+export cli_path="/usr/local/bin/"
+export plugins_path="/usr/local/bin/toyland/"
+export php_cli=$(which php)
+export echocommand="false"
+export pref_editor="vim"
+
+#--------------------------------------------------------------------
+# Parameters
+#--------------------------------------------------------------------
+export fn=$1
+export firstParameter=$2
+export secondParameter=$3
+export allParameters=${@:2}
+
+#--------------------------------------------------------------------
+# Colors
+#--------------------------------------------------------------------
+export GREEN='\033[0;32m'
+export GRAY='\033[0;37m'
+export LIGHTBLUE='\033[1;34m'
+export LIGHTGREEN='\033[1;32m'
+export WHITEBOLD='\033[1;37m'
+export RED='\033[1;31m'
+export NC='\033[0m' # No Color
+
+#--------------------------------------------------------------------
+# List of Commands
+#--------------------------------------------------------------------
+
+COMMANDS=(
+    list
+    help
+    usage
+    categories
+    general
+    search
+    network
+    lamp
+    terraform
+    ansible
+    ssh
+    webdev
+    performance
+    terminal
+    git
+    web_utilities
+    homebrew
+    xcode
+    update
+    upgrade
+    uninstall
+    lock
+    restart
+    sleep
+    display
+    shutdown
+    time
+    presentation
+    uptime
+    volume
+    volume:ismute
+    volume:mute
+    volume:unmute
+    hidden:show
+    hidden:hide
+    screensaver
+    folders:list
+    folder:size
+    folders:remove-empty
+    apps:close-all
+    dock:add-space
+    bluetooth:status
+    bluetooth:enable
+    bluetooth:disable
+    wifi:status
+    wifi:scan
+    wifi:enable
+    wifi:disable
+    wifi:password
+    apps:app-store
+    eject-all
+    battery
+    info
+    find:text
+    find:biggest-files
+    find:biggest-directories
+    zip:extract
+    gzip:compress
+    gzip:extract
+    tar:compress
+    tar:extract
+    find:recent
+    search:replace
+    speedtest
+    speedtest:infinite
+    ports
+    ip:local
+    ip:public
+    dhcp:renew
+    dns:clear
+    mysql
+    mysql:cli
+    mysql:list
+    mysql:export-all
+    mysql:export
+    mysql:import
+    mysql:import-table
+    mysql:create
+    mysql:drop
+    mysql:duplicate
+    mysql:dump
+    mamp:start
+    mamp:stop
+    mamp:restart
+    php:syntax
+    php:info
+    hosts:edit
+    ssh:download-file
+    ssh:download-folder
+    ssh:download-database
+    ssh:sync:local
+    ssh:sync:remote
+    ssh:upload
+    ssh:public-key
+    ssh:list
+    ssh:connect
+    dev:monitor
+    dev:css:convert-to-scss
+    system
+    temp
+    memory
+    htop
+    trash:empty
+    trash:size
+    desktop:cleanup
+    downloads:cleanup
+    git:config
+    git:open
+    git:create:branch
+    git:branches:date
+    git:undo-commit
+    git:log
+    git:branch
+    git:branch:rename
+    git:branch:remove-local
+    git:branch:remove-remote
+    git:remove
+    git:branch
+    git:settings
+    git:add-removed
+    git:size
+    brew:update
+    xcode:cleanup
+    ansible:deploy
+    terraform:check
+    docker:list
+    docker:prune
+)
+## ---- END OF COMMANDS; Comment required for bash_completion------
+
+if [ -z "$fn" ] || [[ "$#" -lt "1" ]]; then
+    fn="list"
+fi
+
+#--------------------------------------------------------------------
+# Help
+#--------------------------------------------------------------------
+
+# Documentation / Help
+source "$MAC/toyland/misc/help"
+
+#--------------------------------------------------------------------
+# Catch command not found
+#--------------------------------------------------------------------
+
+if [[ ! " ${COMMANDS[@]} " =~ " ${fn} " ]]; then
+    echo "${RED}Command not found: '${fn}' $(test ! -z "$allParameters" -a "$allParameters" != " " && echo "\nParameters: $allParameters" || echo "")${NC}"
+    read -p "Choose a category for which to list help/usage... ($(categoriesList)) " category # Ask user for a category to print usage
+
+    if [ ! -z "${category}" ]; then
+        echo "$(usageList ${category})\n" # Show help/usage for user-selected category
+        echo "$(printAdditionalHelp)"
+    else
+        kill -INT $$ # Exit
+    fi
+fi
+
+#--------------------------------------------------------------------
+# Plugins
+#--------------------------------------------------------------------
+
+source "$MAC/toyland/plugins/brew"
+source "$MAC/toyland/plugins/general"
+source "$MAC/toyland/plugins/git"
+source "$MAC/toyland/plugins/brew"
+source "$MAC/toyland/plugins/network"
+source "$MAC/toyland/plugins/performance"
+source "$MAC/toyland/plugins/search"
+source "$MAC/toyland/plugins/ssh"
+source "$MAC/toyland/plugins/xcode"
+source "$MAC/toyland/plugins/volume"
+source "$MAC/toyland/plugins/ansible"
+source "$MAC/toyland/plugins/docker"
+source "$MAC/toyland/plugins/terraform"

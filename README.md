@@ -1,7 +1,7 @@
-<h1 align="center">
-    noddy  
+<p align="center"> <img src="https://user-images.githubusercontent.com/4303310/41114424-6d2d925c-6a95-11e8-9894-00f4a7037216.png" /></p>
+    
 </h1>
-<p align="center" style="font-size: 1.2rem;"> Help DevOps using  macOS </p>
+<p align="center" style="font-size: 1.2rem;"> Noddy Help DevOps in  macOS </p>
 <hr />
 
 | Command  | Description |:star: Now with plugins! You can check the plugins folder: [/noddy/plugins](https://github.com/anmolnagpal/noddy/tree/master/noddy/plugins)

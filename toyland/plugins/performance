@@ -68,9 +68,11 @@ case "$fn" in
     "trash:empty")
         
         if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}sudo rm -rf ~/.Trash/* \n\n${NC}"
+            echo "${GREEN}rm -rf ~/.Trash/* \n\n${NC}"
         fi
-        sudo rm -rf ~/.Trash/*
+        # Your own Trash needs no elevation; sudo here only widened the blast
+        # radius of an rm -rf.
+        rm -rf ~/.Trash/*
     ;;
     
     

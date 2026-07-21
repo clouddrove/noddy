@@ -154,9 +154,35 @@ case "$fn" in
     "git:remove")
         
         if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}find . -name '.git' -exec rm -rf {} \;\n\n${NC}"
+            echo "${GREEN}find . -name '.git' -maxdepth 2 -exec rm -rf {} +\n\n${NC}"
         fi
-        find . -name '.git' -exec rm -rf {} \;
+
+        # This used to recurse without limit and delete every .git directory
+        # underneath, so running it one level too high destroyed the history
+        # of every repository in the tree. Show exactly what will go, and
+        # bound the search so a stray run cannot reach the whole workspace.
+        repos=$(find . -maxdepth 2 -name '.git' -type d 2>/dev/null)
+
+        if [ -z "$repos" ]; then
+            echo "No .git directory found in $(pwd) or its immediate subdirectories."
+            exit 0
+        fi
+
+        echo "${RED}This permanently deletes the Git history of:${NC}"
+        echo "$repos" | sed 's|/\.git$||' | sed 's|^\./||' | sed 's|^|  |'
+        echo "\n============================================="
+        read -r -p "Delete? This cannot be undone. (Yes / No) " response
+        case $response in
+            [yY][eE][sS]|[yY])
+                echo "$repos" | while IFS= read -r d; do
+                    [ -n "$d" ] && rm -rf "$d"
+                done
+                echo "${GREEN}Git history removed${NC}"
+            ;;
+            *)
+                echo "Cancelled."
+            ;;
+        esac
     ;;
     
     

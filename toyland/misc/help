@@ -118,10 +118,6 @@ function usageList()
             echo "${LIGHTBLUE}noddy git:size${GRAY}: Get size for current Git repository "
             echo "${NC}\n"
             ;;
-            ide)
-            ;;
-            itunes)
-            ;;
         network)
             echo "\n${WHITEBOLD}Network Utilities:"
             echo "${LIGHTBLUE}noddy speedtest${GRAY}: Internet connection speed test "

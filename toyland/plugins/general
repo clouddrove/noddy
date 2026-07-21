@@ -93,13 +93,29 @@ case "$fn" in
     ;;
 
 
-    # Prepare MAC for presentation: minimize all apps, send files from desktop and downloads to trash and set not disturb mode
+    # Prepare MAC for presentation: minimize all apps and send files from desktop and downloads to trash
     "presentation")
 
-        # Close browsers
-        killall -9 Safari
-        killall -9 Google\ Chrome
-        killall -9 firefox
+        echo "${RED}This will:${NC}"
+        echo "  - force quit Safari, Chrome and Firefox, losing unsaved tabs"
+        echo "  - minimise every visible window"
+        echo "  - move everything on your Desktop and in Downloads to the Trash"
+        echo "\n============================================="
+        read -r -p "Continue? (Yes / No) " response
+        case $response in
+            [yY][eE][sS]|[yY])
+            ;;
+            *)
+                echo "Cancelled."
+                exit 0
+            ;;
+        esac
+
+        # Close browsers. These are killed rather than quit, so anything
+        # unsaved is lost; that is why the command confirms first.
+        killall -9 Safari 2>/dev/null
+        killall -9 Google\ Chrome 2>/dev/null
+        killall -9 firefox 2>/dev/null
 
 
         # Minimize all the windows
@@ -126,21 +142,14 @@ end try
 end tell
 END
 
-        # Set not disturb mode
-osascript >/dev/null <<'END'
-try
-	tell application "System Events"
-		tell process "SystemUIServer"
-			key down option
-			click menu bar item "Notification Center" of menu bar 1
-			key up option
-		end tell
-	end tell
-end try
-END
-
-        # Restart notification center
-        killall NotificationCenter
+        # Do Not Disturb is deliberately not automated here. There is no
+        # public API for setting a Focus mode, and the old approach of
+        # option-clicking the Notification Center menu bar item through
+        # System Events targets a menu extra that no longer exists.
+        #
+        # If you want this step, create a Shortcut that sets your Focus and
+        # call it: shortcuts run "Presentation Mode"
+        echo "\n${LIGHTBLUE}Reminder:${NC} turn on a Focus mode manually, or run a Shortcut that sets one."
     ;;
 
 
@@ -264,9 +273,31 @@ END
         fi
         # To customize ignored apps, just put the keywords in $ignore
         # or add a file called $HOME/.toyland and set the variable __MAC_CLI_IGNORE_APPS
-        # To test which apps you are going to kill, run:
-        # ps aux | grep /Applications | grep -v $ignore | sed "s/\ *\ /\ /g" | cut -d ' ' -f 11 | xargs -I X echo X
-        ps aux | grep /Applications | grep -v "${ignore}" | sed "s/\ *\ /\ /g" | cut -d ' ' -f 2 | xargs -I X kill -9 X
+
+        # kill -9 gives applications no chance to save, so list what will be
+        # killed and confirm rather than acting on a bare command.
+        # Take everything from the command column onwards, not just field 11:
+        # application paths contain spaces, so a single field truncates
+        # "Google Chrome" to "Google".
+        victims=$(ps aux | grep /Applications | grep -v "${ignore}" | sed "s/\ *\ /\ /g" | cut -d ' ' -f 11- | sed -n 's|.*/\([^/]*\.app\)/.*|\1|p' | sort -u)
+
+        if [ -z "$victims" ]; then
+            echo "No applications to close."
+            exit 0
+        fi
+
+        echo "${RED}Force quitting these applications, losing unsaved work:${NC}"
+        echo "$victims" | sed 's|^|  |'
+        echo "\n============================================="
+        read -r -p "Continue? (Yes / No) " response
+        case $response in
+            [yY][eE][sS]|[yY])
+                ps aux | grep /Applications | grep -v "${ignore}" | sed "s/\ *\ /\ /g" | cut -d ' ' -f 2 | xargs -I X kill -9 X
+            ;;
+            *)
+                echo "Cancelled."
+            ;;
+        esac
     ;;
 
 

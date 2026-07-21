@@ -1,0 +1,217 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Static analysis has no macOS dependency, so it runs on the self-hosted
+  # Linux runners and gives fast feedback before the macOS jobs start.
+  lint:
+    name: Lint and registry check
+    runs-on: arc-runners
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install shellcheck
+        run: |
+          if ! command -v shellcheck > /dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          fi
+          shellcheck --version
+
+      - name: Syntax check every script
+        run: |
+          status=0
+          for f in noddy toyland/misc/help toyland/plugins/* toyland/setup/* \
+                   toyland/completion/noddy.bash .github/scripts/*.sh; do
+            if ! bash -n "$f"; then
+              echo "::error file=$f::bash -n failed"
+              status=1
+            fi
+          done
+          exit $status
+
+      - name: Shellcheck
+        run: |
+          # Plugins are sourced fragments rather than standalone scripts, so
+          # they read variables exported by noddy and carry no shebang of their
+          # own. SC2154 (unassigned reference), SC1090/SC1091 (non-constant
+          # source) and SC2148 (missing shebang) are expected here.
+          shellcheck --shell=bash --severity=error \
+            --exclude=SC1090,SC1091,SC2154,SC2148 \
+            noddy toyland/setup/* toyland/plugins/* toyland/misc/help \
+            toyland/completion/noddy.bash .github/scripts/*.sh
+
+      - name: Shellcheck warnings (informational)
+        continue-on-error: true
+        run: |
+          # Warning level still reports long-standing style issues across the
+          # older plugins. Surfaced so they stay visible, without gating CI.
+          shellcheck --shell=bash --severity=warning \
+            --exclude=SC1090,SC1091,SC2154,SC2148 \
+            noddy toyland/setup/* toyland/plugins/* toyland/misc/help \
+            toyland/completion/noddy.bash .github/scripts/*.sh
+
+      - name: Command registries are consistent
+        run: ./.github/scripts/check-registries.sh
+
+      - name: Completions parse the command list
+        run: |
+          count=$(awk '/^COMMANDS=\(/{flag=1; next}
+                       /END OF COMMANDS/{exit}
+                       flag{gsub(/[ \t]/,""); if (length($0) && $0 != ")") print}' noddy | wc -l)
+          echo "COMMANDS array holds $count entries"
+          if [ "$count" -lt 100 ]; then
+            echo "::error::Extraction returned $count commands; the awk range in the completions is probably broken"
+            exit 1
+          fi
+
+  # The installer, the Homebrew prefix logic and every macOS-specific command
+  # can only be exercised on real macOS. Both architectures are covered because
+  # the Homebrew prefix differs between them, which is what broke before.
+  macos:
+    name: Install on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, macos-15-intel]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Report runner architecture and Homebrew prefix
+        run: |
+          echo "arch:         $(uname -m)"
+          echo "macOS:        $(sw_vers -productVersion)"
+          echo "brew --prefix: $(brew --prefix)"
+
+      - name: Run the installer unattended
+        env:
+          NODDY_NONINTERACTIVE: "1"
+        run: sh toyland/setup/install
+
+      - name: noddy is on PATH and runs
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          export PATH="${BREW_PREFIX}/bin:$PATH"
+
+          command -v noddy || { echo "::error::noddy not found on PATH after install"; exit 1; }
+          noddy help > /dev/null || { echo "::error::noddy help failed"; exit 1; }
+          noddy categories | grep -q "wifi" || { echo "::error::categories output is missing wifi"; exit 1; }
+
+      - name: Installed tree is complete
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          missing=0
+          for f in "${BREW_PREFIX}/bin/noddy" \
+                   "${BREW_PREFIX}/bin/toyland/misc/help" \
+                   "${BREW_PREFIX}/bin/toyland/plugins/wifi" \
+                   "${BREW_PREFIX}/bin/toyland/plugins/compress" \
+                   "${BREW_PREFIX}/bin/toyland/plugins/bluetooth"; do
+            [ -f "$f" ] || { echo "::error::missing $f"; missing=1; }
+          done
+          [ -x "${BREW_PREFIX}/bin/noddy" ] || { echo "::error::noddy is not executable"; missing=1; }
+          exit $missing
+
+      - name: Completions were installed
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          missing=0
+          for f in "${BREW_PREFIX}/share/zsh/site-functions/_noddy" \
+                   "${BREW_PREFIX}/etc/bash_completion.d/noddy" \
+                   "${BREW_PREFIX}/share/fish/vendor_completions.d/noddy.fish"; do
+            [ -f "$f" ] || { echo "::error::completion not installed: $f"; missing=1; }
+          done
+          exit $missing
+
+      - name: Completions resolve commands in zsh and bash
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          export PATH="${BREW_PREFIX}/bin:$PATH"
+
+          zsh -f -c '
+            script=${commands[noddy]}
+            cmds=( ${(f)"$(awk "/^COMMANDS=\(/{flag=1; next}
+                                /END OF COMMANDS/{exit}
+                                flag{gsub(/[ \t]/, \"\"); if (length(\$0) \&\& \$0 != \")\") print}" $script)"} )
+            print "zsh resolved ${#cmds} commands"
+            (( ${#cmds} > 100 )) || exit 1
+          '
+
+          bash -c "
+            source '${BREW_PREFIX}/etc/bash_completion.d/noddy'
+            n=\$(_noddy_commands | wc -l)
+            echo \"bash resolved \$n commands\"
+            [ \"\$n\" -gt 100 ]
+          "
+
+      - name: Read-only commands execute
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          export PATH="${BREW_PREFIX}/bin:$PATH"
+
+          # Only commands that neither delete anything, wait for input, nor
+          # need hardware the runner lacks.
+          for cmd in info uptime folder:size folders:list trash:size \
+                     git:config git:settings git:log git:branch \
+                     git:branches:date git:size ip:local; do
+            printf '%-20s ' "$cmd"
+            if noddy "$cmd" > /dev/null 2>&1; then
+              echo "ok"
+            else
+              echo "FAILED (exit $?)"
+              echo "::error::noddy $cmd failed"
+              exit 1
+            fi
+          done
+
+      - name: Hardware-dependent commands degrade cleanly
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          export PATH="${BREW_PREFIX}/bin:$PATH"
+
+          # CI runners are VMs with no Wi-Fi or Bluetooth radio. These must
+          # report the absence and exit, never crash with a shell error.
+          for cmd in wifi:status bluetooth:status battery; do
+            noddy "$cmd" > /dev/null 2>&1
+            code=$?
+            echo "$cmd exited $code"
+            if [ "$code" -gt 1 ]; then
+              echo "::error::noddy $cmd exited $code, which suggests a shell error rather than a handled absence"
+              exit 1
+            fi
+          done
+
+      - name: Unknown commands are rejected
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          export PATH="${BREW_PREFIX}/bin:$PATH"
+
+          output=$(echo "" | noddy definitely:not:a:real:command 2>&1 || true)
+          echo "$output" | grep -q "Command not found" \
+            || { echo "::error::unknown command was not rejected"; exit 1; }
+
+      - name: Uninstall removes everything
+        run: |
+          BREW_PREFIX="$(brew --prefix)"
+          sh toyland/setup/uninstall
+
+          leftover=0
+          for f in "${BREW_PREFIX}/bin/noddy" \
+                   "${BREW_PREFIX}/bin/toyland" \
+                   "${BREW_PREFIX}/share/zsh/site-functions/_noddy" \
+                   "${BREW_PREFIX}/etc/bash_completion.d/noddy" \
+                   "${BREW_PREFIX}/share/fish/vendor_completions.d/noddy.fish"; do
+            if [ -e "$f" ]; then
+              echo "::error::uninstall left $f behind"
+              leftover=1
+            fi
+          done
+          exit $leftover

@@ -1,0 +1,5 @@
+# Labels for the organisation's Actions Runner Controller scale set, which
+# actionlint cannot discover on its own.
+self-hosted-runner:
+  labels:
+    - arc-runners

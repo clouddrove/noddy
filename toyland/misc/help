@@ -192,7 +192,7 @@ function usageList()
 case ${fn} in
     "list"|"help"|"usage")
         echo "$(printInfo)"
-        for c in ${noddyCategories[@]}
+        for c in "${noddyCategories[@]}"
         do
             echo "$(usageList ${c})"
         done

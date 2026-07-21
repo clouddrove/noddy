@@ -1,0 +1,35 @@
+#compdef noddy
+
+# Zsh completion for noddy.
+#
+# The command list is read out of the COMMANDS array in the noddy script
+# itself, between "COMMANDS=(" and the "END OF COMMANDS" marker, so adding a
+# command to that array is all it takes to complete on it.
+#
+# Install by placing this file, named _noddy, in a directory on $fpath and
+# running compinit. The installer writes it to
+# $(brew --prefix)/share/zsh/site-functions.
+
+_noddy() {
+    local script
+    script=${commands[noddy]}
+
+    if [[ -z $script ]]; then
+        _files
+        return
+    fi
+
+    if (( CURRENT > 2 )); then
+        _files
+        return
+    fi
+
+    local -a cmds
+    cmds=( ${(f)"$(awk '/^COMMANDS=\(/{flag=1; next}
+                        /END OF COMMANDS/{exit}
+                        flag{gsub(/[ \t]/, ""); if (length($0) && $0 != ")") print}' $script)"} )
+
+    _describe -t commands 'noddy command' cmds
+}
+
+_noddy "$@"

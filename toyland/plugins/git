@@ -6,16 +6,6 @@
 
 case "$fn" in
     
-    # Display local Git configuration
-    "brew:git:config")
-        
-        if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}git config --list\n\n${NC}"
-        fi
-        git config --list
-    ;;
-    
-    
     # Open current Git repository on Github
     "git:open")
         
@@ -52,7 +42,7 @@ case "$fn" in
     
     
     # Get last update date for all branches in current project
-    "git:branches")
+    "git:branches:date"|"git:branches")
         
         git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
     ;;
@@ -140,8 +130,8 @@ case "$fn" in
     ;;
     
     
-    # Check Git settings
-    "git:config")
+    # Display local Git configuration
+    "git:config"|"git:settings")
         
         if [ "$echocommand" == "true" ]; then
             echo "${GREEN}git config --list\n\n${NC}"
@@ -167,13 +157,6 @@ case "$fn" in
             echo "${GREEN}find . -name '.git' -exec rm -rf {} \;\n\n${NC}"
         fi
         find . -name '.git' -exec rm -rf {} \;
-    ;;
-    
-    
-    # Open current Git repository URL
-    "git:open")
-        
-        open `git remote -v | awk '/fetch/{print $2}' | sed -Ee 's#(git@|git://)#http://#' -e 's@com:@com/@'`| head -n1
     ;;
     
     

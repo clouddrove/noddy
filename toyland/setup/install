@@ -54,9 +54,19 @@ main() {
     INSTALL_DIR="${BREW_PREFIX}/bin"
     echo "Installing to ${INSTALL_DIR}\n"
 
-    printf "${LIGHTGREEN}"
-    read -r -p "Would you like noddy to show you the commands that are run on each mac command? (Yes / No) " response
-    printf "${NC}"
+    # Set NODDY_NONINTERACTIVE=1 to accept every default and skip the optional
+    # extras. Used by CI, and useful for any unattended install.
+    ask() {
+        if [ -n "$NODDY_NONINTERACTIVE" ]; then
+            response="$2"
+            return 0
+        fi
+        printf "${LIGHTGREEN}"
+        read -r -p "$1 " response
+        printf "${NC}"
+    }
+
+    ask "Would you like noddy to show you the commands that are run on each mac command? (Yes / No)" "No"
 
     if [ ! -d "$INSTALL_DIR" ]; then
         echo "Creating ${INSTALL_DIR}..."
@@ -78,12 +88,33 @@ main() {
         ;;
     esac
 
-    echo "${LIGHTGREEN}Please enter your favourite text editor (by entering the command that opens your favourite editor. i.e: nano):"
-    echo "${NC}Press enter without any value to keep default: vim"
-    read pref_editor
-    if [ ! -z "$pref_editor" -a "$pref_editor" != " " ]; then
+    if [ -n "$NODDY_NONINTERACTIVE" ]; then
+        pref_editor=""
+    else
+        echo "${LIGHTGREEN}Please enter your favourite text editor (by entering the command that opens your favourite editor. i.e: nano):"
+        echo "${NC}Press enter without any value to keep default: vim"
+        read pref_editor
+    fi
+    if [ -n "$pref_editor" ] && [ "$pref_editor" != " " ]; then
         LC_CTYPE=C sed -i'' -e "s#pref_editor=\"vim\"#pref_editor=\"${pref_editor}\"#g" "${INSTALL_DIR}/noddy"
     fi
+
+    # Shell completions. Homebrew already puts these directories on the
+    # relevant search paths, so no shell config edit is needed for bash or
+    # fish. Zsh additionally needs site-functions on $fpath; see the README.
+    install_completion() {
+        target_dir="$1"
+        source_file="$2"
+        target_name="$3"
+        mkdir -p "$target_dir" 2>/dev/null || return 0
+        cp "$PACKAGE_DIRECTORY/toyland/completion/${source_file}" "${target_dir}/${target_name}" 2>/dev/null \
+            && echo "  completion: ${target_dir}/${target_name}"
+    }
+
+    echo "Installing shell completions..."
+    install_completion "${BREW_PREFIX}/share/zsh/site-functions" "_noddy" "_noddy"
+    install_completion "${BREW_PREFIX}/etc/bash_completion.d" "noddy.bash" "noddy"
+    install_completion "${BREW_PREFIX}/share/fish/vendor_completions.d" "noddy.fish" "noddy.fish"
 
     for pkg in git pv node python3 fdupes wget; do
         if ! brew list --formula "$pkg" > /dev/null 2>&1; then
@@ -94,9 +125,7 @@ main() {
     done
 
     if ! command -v glances > /dev/null; then
-        printf "${LIGHTGREEN}"
-        read -r -p "Would you like to install Glances to access advanced information about the system (https://github.com/nicolargo/glances)? (Yes / No) " response
-        printf "${NC}"
+        ask "Would you like to install Glances to access advanced information about the system (https://github.com/nicolargo/glances)? (Yes / No)" "No"
         case $response in
             [yY][eE][sS]|[yY])
                 echo "Installing Glances (https://github.com/nicolargo/glances)..."
@@ -110,9 +139,7 @@ main() {
     fi
 
     if ! command -v fast > /dev/null; then
-        printf "${LIGHTGREEN}"
-        read -r -p "Would you like to install Fast CLI to run internet speed tests from your command line (https://github.com/sindresorhus/fast-cli)? (Yes / No) " response
-        printf "${NC}"
+        ask "Would you like to install Fast CLI to run internet speed tests from your command line (https://github.com/sindresorhus/fast-cli)? (Yes / No)" "No"
         case $response in
             [yY][eE][sS]|[yY])
                 echo "Installing Fast CLI (https://github.com/sindresorhus/fast-cli)..."
@@ -125,9 +152,7 @@ main() {
     fi
 
     if ! command -v istats > /dev/null; then
-        printf "${LIGHTGREEN}"
-        read -r -p "Would you like to install iStats to access information about your Mac temperature and fan speed? (Yes / No) " response
-        printf "${NC}"
+        ask "Would you like to install iStats to access information about your Mac temperature and fan speed? (Yes / No)" "No"
         case $response in
             [yY][eE][sS]|[yY])
                 echo "Installing iStats..."

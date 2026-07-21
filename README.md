@@ -26,12 +26,55 @@ Via wget
 Then, re-open your terminal client. You will be able to run all the commands listed below, for example:
 > `noddy help`
 
+For an unattended install (CI, provisioning scripts), set `NODDY_NONINTERACTIVE=1` to accept every default and skip the optional extras:
+> `NODDY_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/install)"`
+
+---
+
+### Shell completion
+
+The installer writes completions for zsh, bash and fish into your Homebrew prefix. The command list is read from the noddy script itself, so completions stay current as commands are added.
+
+**zsh**
+
+Homebrew's `site-functions` directory has to be on `$fpath` before `compinit` runs. If you use Oh My Zsh or already load Homebrew's completions, this is done for you and no change is needed. Otherwise add this to `~/.zshrc`:
+
+```zsh
+fpath=("$(brew --prefix)/share/zsh/site-functions" $fpath)
+autoload -Uz compinit && compinit
+```
+
+Then start a new shell and press Tab:
+
+```
+noddy git:<Tab>
+git:add-removed      git:branch:remove-local   git:log
+git:branch           git:branch:remove-remote  git:open
+git:branches         git:branch:rename         git:remove
+git:branches:date    git:config                git:settings
+git:create:branch    git:undo-commit           git:size
+```
+
+If completions do not appear, delete the cache and retry: `rm -f ~/.zcompdump && compinit`.
+
+**bash**
+
+Requires `bash-completion` (`brew install bash-completion@2`) and its loader in `~/.bash_profile`:
+
+```bash
+[[ -r "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]] && . "$(brew --prefix)/etc/profile.d/bash_completion.sh"
+```
+
+**fish**
+
+Nothing to configure. Fish reads `vendor_completions.d` automatically.
+
 ---
 
 ### Configuration
 
 The configuration is done when you install noddy CLI for the first time though the installer configuration wizard.
-After that, you can update your noddy CLI configuration by editing the following file: `/usr/local/bin/noddy`
+After that, you can update your noddy CLI configuration by editing the installed script at `$(brew --prefix)/bin/noddy`, which is `/opt/homebrew/bin/noddy` on Apple Silicon and `/usr/local/bin/noddy` on Intel.
 
 ---
 

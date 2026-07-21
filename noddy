@@ -77,7 +77,9 @@ COMMANDS=(
     display
     shutdown
     time
+    clock
     presentation
+    files:remove-older
     uptime
     volume
     volume:ismute
@@ -112,6 +114,7 @@ COMMANDS=(
     tar:compress
     tar:extract
     find:recent
+    find:duplicated
     search:replace
     speedtest
     speedtest:infinite
@@ -160,6 +163,7 @@ COMMANDS=(
     git:open
     git:create:branch
     git:branches:date
+    git:branches
     git:undo-commit
     git:log
     git:branch
@@ -201,16 +205,21 @@ source "$MAC/toyland/misc/help"
 # Catch command not found
 #--------------------------------------------------------------------
 
-if [[ ! " ${COMMANDS[@]} " =~ " ${fn} " ]]; then
+if [[ " ${COMMANDS[*]} " != *" ${fn} "* ]]; then
     echo "${RED}Command not found: '${fn}' $(test ! -z "$allParameters" -a "$allParameters" != " " && echo "\nParameters: $allParameters" || echo "")${NC}"
-    read -p "Choose a category for which to list help/usage... ($(categoriesList)) " category # Ask user for a category to print usage
+
+    # Only offer the category picker on a terminal. When output is piped or
+    # scripted there is nobody to answer, and the old kill -INT $$ signalled
+    # the whole process group, taking the calling shell down with it.
+    if [ -t 0 ]; then
+        read -p "Choose a category for which to list help/usage... ($(categoriesList)) " category
+    fi
 
     if [ ! -z "${category}" ]; then
         echo "$(usageList ${category})\n" # Show help/usage for user-selected category
         echo "$(printAdditionalHelp)"
-    else
-        kill -INT $$ # Exit
     fi
+    exit 1
 fi
 
 #--------------------------------------------------------------------

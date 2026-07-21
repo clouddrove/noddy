@@ -15,19 +15,28 @@ When you run a function, the executed command is displayed and that helps you me
 
 ---
 
-### Installation in 1 Simple Step - Including configuration wizard!
+### Installation
 
-Via curl
-> `sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/install)"`
+**Homebrew (recommended)**
 
-Via wget
-> `sh -c "$(wget https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/install -O -)"`
+```sh
+brew install clouddrove/tap/noddy
+```
+
+This installs a tagged, checksum-verified release along with completions for zsh, bash and fish, and `brew upgrade noddy` keeps it current.
+
+**Install script**
+
+The script installs from the default branch rather than a verified release, so prefer Homebrew unless you specifically want the tip of master.
+
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/install)"
+```
+
+Set `NODDY_NONINTERACTIVE=1` to accept the defaults and skip the optional extras.
 
 Then, re-open your terminal client. You will be able to run all the commands listed below, for example:
 > `noddy help`
-
-For an unattended install (CI, provisioning scripts), set `NODDY_NONINTERACTIVE=1` to accept every default and skip the optional extras:
-> `NODDY_NONINTERACTIVE=1 sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/install)"`
 
 ---
 
@@ -94,14 +103,20 @@ Node and Python are no longer installed up front. They are pulled in only if you
 
 ### Update
 
-You can update noddy CLI to the latest version by running:
+If you installed with Homebrew:
+> `brew upgrade noddy`
+
+If you used the install script:
 > `sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/update)"`
 
 ---
 
 ### Uninstallation
 
-You can uninstall noddy CLI by running:
+If you installed with Homebrew:
+> `brew uninstall noddy`
+
+If you used the install script:
 > `sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/uninstall)"`
 
 ---
@@ -233,7 +248,7 @@ The following amazing projects have been integrated on the noddy script (all the
 
 | Command  | Description |
 | ------------- | ------------- |
-| `noddy brew`  | Get a list of installed Homebrew packages  |
+| `noddy brew:update`  | Install macOS software updates, then update Homebrew, npm and pip packages  |
 
 
 ### Xcode Utilities

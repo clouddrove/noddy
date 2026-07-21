@@ -185,16 +185,22 @@ jobs:
           export PATH="${BREW_PREFIX}/bin:$PATH"
 
           # CI runners are VMs with no Wi-Fi or Bluetooth radio. These must
-          # report the absence and exit, never crash with a shell error.
+          # report the absence and exit 0 or 1, never crash with a shell error.
+          #
+          # The step runs under bash -e, so capture the status with || rather
+          # than reading $? from an untested command, which would abort here
+          # the moment one of these legitimately exits 1.
+          failed=0
           for cmd in wifi:status bluetooth:status battery; do
-            noddy "$cmd" > /dev/null 2>&1
-            code=$?
+            code=0
+            noddy "$cmd" > /dev/null 2>&1 || code=$?
             echo "$cmd exited $code"
             if [ "$code" -gt 1 ]; then
               echo "::error::noddy $cmd exited $code, which suggests a shell error rather than a handled absence"
-              exit 1
+              failed=1
             fi
           done
+          exit $failed
 
       - name: Unknown commands are rejected
         run: |

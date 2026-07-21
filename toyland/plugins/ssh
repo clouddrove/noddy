@@ -252,10 +252,80 @@ case "$fn" in
     # SSH key Utilities
     "ssh:public-key")
 
-        if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}pbcopy < ~/.ssh/id_rsa.pub \n\n${NC}"
+        # id_rsa is no longer the default key type; prefer ed25519 and fall
+        # back rather than assuming a file that may not exist.
+        for key in ~/.ssh/id_ed25519.pub ~/.ssh/id_rsa.pub ~/.ssh/id_ecdsa.pub; do
+            if [ -f "$key" ]; then
+                if [ "$echocommand" == "true" ]; then
+                    echo "${GREEN}pbcopy < ${GRAY}${key}\n\n${NC}"
+                fi
+                pbcopy < "$key"
+                echo "${GREEN}Copied $(basename "$key") to the clipboard${NC}"
+                exit 0
+            fi
+        done
+
+        echo "${RED}No public key found in ~/.ssh${NC}"
+        echo "Create one with ${GREEN}ssh-keygen -t ed25519${NC}"
+        exit 1
+    ;;
+
+
+    # List the hosts defined in the SSH config
+    "ssh:list")
+
+        if [ ! -f ~/.ssh/config ]; then
+            echo "No ~/.ssh/config found."
+            exit 0
         fi
-        pbcopy < ~/.ssh/id_rsa.pub
+
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}awk '/^Host /' ~/.ssh/config\n\n${NC}"
+        fi
+
+        echo "${WHITEBOLD}Hosts in ~/.ssh/config:${NC}"
+        # Skip wildcard patterns; they are defaults rather than destinations.
+        awk '
+            /^[Hh]ost / {
+                for (i = 2; i <= NF; i++) {
+                    if ($i !~ /[*?]/) host[$i] = $i
+                    last = $i
+                }
+                current = last
+            }
+            /^[[:space:]]*[Hh]ost[Nn]ame / && current { target[current] = $2 }
+            /^[[:space:]]*[Uu]ser / && current { user[current] = $2 }
+            END {
+                for (h in host) {
+                    line = "  " h
+                    if (h in target) line = line "  ->  " (h in user ? user[h] "@" : "") target[h]
+                    print line
+                }
+            }
+        ' ~/.ssh/config | sort
+
+        keys=$(find ~/.ssh -maxdepth 1 -name '*.pub' 2>/dev/null | sed 's|.*/||; s|\.pub$||' | sort)
+        if [ -n "$keys" ]; then
+            echo "\n${WHITEBOLD}Keys in ~/.ssh:${NC}"
+            echo "$keys" | sed 's|^|  |'
+        fi
+    ;;
+
+
+    # Connect to a host defined in the SSH config
+    "ssh:connect")
+
+        if [ -z "$firstParameter" ]; then
+            echo "Please specify a host"
+            echo "E.g.: ssh:connect myserver"
+            echo "\nRun ${LIGHTBLUE}noddy ssh:list${NC} to see configured hosts."
+            exit 1
+        fi
+
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}ssh ${GRAY}${firstParameter}\n\n${NC}"
+        fi
+        ssh "$firstParameter"
     ;;
 
 

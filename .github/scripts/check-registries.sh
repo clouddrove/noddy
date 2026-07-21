@@ -24,15 +24,10 @@ HELP_HANDLED=(list help usage categories)
 CATEGORIES=$(awk '/^noddyCategories=\(/{flag=1; next} /^\)/{exit} flag{gsub(/[ \t]/,""); if (length($0)) print}' toyland/misc/help)
 
 # Pre-existing breakage. Remove an entry here once it is genuinely fixed.
-KNOWN_DRIFT=(
-    "terraform:check"     # toyland/plugins/terraform is a stub
-    "tf:p" "tf:f" "tf:d"  # terraform stub arms with empty bodies
-    "ansible:deploy"      # plugin uses a different label
-    "ssh:list"            # documented in README but never implemented
-    "terminal" "homebrew" "display"
-    "update" "brew"
-    "ssh:connect"
-)
+# Empty, and it should stay that way. Every command in COMMANDS resolves to
+# an implementation, and every implemented command is registered. Adding an
+# entry here is a decision to ship a command that does not work.
+KNOWN_DRIFT=()
 
 contains() {
     local needle="$1"; shift

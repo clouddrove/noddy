@@ -69,21 +69,23 @@ COMMANDS=(
     general
     search
     network
-    terraform
     ansible
     ssh
     performance
-    terminal
     git
-    homebrew
     xcode
+    bluetooth
+    brew
+    compress
+    docker
+    volume
+    wifi
     update
     upgrade
     uninstall
     lock
     restart
     sleep
-    display
     shutdown
     time
     clock
@@ -168,7 +170,6 @@ COMMANDS=(
     brew:update
     xcode:cleanup
     ansible:deploy
-    terraform:check
     docker:list
     docker:images
     docker:remove-images
@@ -227,7 +228,6 @@ source "$MAC/toyland/plugins/network"
 source "$MAC/toyland/plugins/performance"
 source "$MAC/toyland/plugins/search"
 source "$MAC/toyland/plugins/ssh"
-source "$MAC/toyland/plugins/terraform"
 source "$MAC/toyland/plugins/volume"
 source "$MAC/toyland/plugins/wifi"
 source "$MAC/toyland/plugins/xcode"

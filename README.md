@@ -10,7 +10,7 @@ _Contributions to add new plugins and keep improving the existing ones are welco
 
 ![image](https://github.com/clouddrove/noddy/raw/master/demo/demo.gif)
 
-The ultimate tool for devops to manage their noddy. It provides a huge set of command line commands that automate the usage of your noddyOS system.
+The ultimate tool for devops to manage their noddy. It provides a huge set of command line commands that automate the usage of your macOS system.
 When you run a function, the executed command is displayed and that helps you memorize each of the Utilities for future usage.
 
 ---
@@ -140,18 +140,18 @@ The following amazing projects have been integrated on the noddy script (all the
 
 | Command  | Description | Arguments |
 | ------------- | ------------- | ------------- |
-| `noddy update`  | Install noddyOS software updates, update installed Ruby gems, Homebrew, npm and their installed packages  | |
+| `noddy update`  | Install macOS software updates, then update Homebrew, npm and pip packages  | |
 | `noddy lock`  | Lock  | |
-| `noddy restart`  | Restart noddyOS  | |
+| `noddy restart`  | Restart macOS  | |
 | `noddy sleep`  | Sleep mode  | |
 | `noddy shutdown`  | Shutdown  | |
-| `noddy presentation`  | Prepare noddy for presentation: minimize all apps, close browsers, send files from desktop and downloads to trash and set not disturb mode  | |
+| `noddy presentation`  | Prepare for presenting: minimize all apps, close browsers, send Desktop and Downloads to the Trash. Asks first.  | |
 | `noddy time`  | Show clock at top right position in Terminal/iTerm  | |
 | `noddy screensaver`  | Start screensaver  | |
 | `noddy folders:list`  | List folders in current directory with their current size  | |
 | `noddy folder:size`  | Calculate current folder size  | |
 | `noddy folders:remove-empty`  | Remove empty subdirectories  | |
-| `noddy apps:close-all`  | Close all opened apps  | |
+| `noddy apps:close-all`  | Force quit all open apps. Asks first.  | |
 | `noddy bluetooth:status`  | Get the bluetooth status  | |
 | `noddy bluetooth:enable`  | Enable bluetooth  | |
 | `noddy bluetooth:disable`  | Disable bluetooth  | |
@@ -162,9 +162,9 @@ The following amazing projects have been integrated on the noddy script (all the
 | `noddy wifi:password`  | Get password for current wifi network  | |
 | `noddy dock:add-space`  | Add blank space to dock  | |
 | `noddy apps:app-store`  | Get list of installed apps from App Store  | |
-| `noddy eject-all`  | Eject all mounted volumes and disks  | |
+| `noddy eject-all`  | Eject all removable volumes  | |
 | `noddy battery`  | Get battery status  | |
-| `noddy info`  | Get noddyOS version information  | |
+| `noddy info`  | Get macOS version information  | |
 | `noddy hidden:show`  | Show hidden files  | |
 | `noddy hidden:hide`  | Hide hidden files  | |
 | `noddy find:text X`  | Find exact phrase recursively inside directory  | X = Text string |
@@ -208,7 +208,8 @@ The following amazing projects have been integrated on the noddy script (all the
 | `noddy ssh:sync:remote X`  | Sync remote folder with local folder using rsync through SSH (upload local folder to remote folder)  |  X = Path of the remote folder to sync from local folder  |
 | `noddy ssh:upload X`  | Upload file to remote server through SSH  |  X = Path of the file to upload to the remote server  |
 | `noddy ssh:public-key`  | Copy SSH Public Key  |  |
-| `noddy ssh:list`  | List all the saved SSH credentials  |  |
+| `noddy ssh:list`  | List hosts defined in `~/.ssh/config` and keys in `~/.ssh`  |  |
+| `noddy ssh:connect X`  | Connect to a configured host  | X = host name |
 
 
 ### Performance and maintenance Utilities
@@ -242,6 +243,20 @@ The following amazing projects have been integrated on the noddy script (all the
 | `noddy git:settings`  | Check Git settings  |
 | `noddy git:add-removed`  | Add removed files to staged files  |
 | `noddy git:size`  | Get size for current Git directory  |
+
+
+### Docker Utilities
+
+| Command  | Description |
+| ------------- | ------------- |
+| `noddy docker:list`  | List all containers  |
+| `noddy docker:images`  | List all images  |
+| `noddy docker:stop`  | Stop all running containers  |
+| `noddy docker:remove`  | Remove all containers  |
+| `noddy docker:remove-images`  | Remove all images  |
+| `noddy docker:prune`  | Remove unused docker data  |
+| `noddy docker:start`  | Start Colima or Docker Desktop  |
+| `noddy docker:restart`  | Restart Colima or Docker Desktop  |
 
 
 ### Homebrew Utilities

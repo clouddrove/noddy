@@ -7,7 +7,8 @@
 case "$fn" in
     
     # Install macOS software updates, update installed  Homebrew, npm, pip and their installed packages
-    "brew:update")
+    # "update" is the name the README documents for this.
+    "brew:update"|"update")
         
         echo "Updating macOS..."
         if [ "$echocommand" == "true" ]; then

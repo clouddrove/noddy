@@ -16,7 +16,6 @@ network
 performance
 search
 ssh
-terraform
 volume
 wifi
 xcode
@@ -52,12 +51,14 @@ function usageList()
             ;;
         bluetooth)
             echo "\n${WHITEBOLD}Bluetooth Utilities:"
-            echo "${LIGHTBLUE}noddy b:install${GRAY}:"
+            echo "${LIGHTBLUE}noddy bluetooth:status${GRAY}: Get the bluetooth status"
+            echo "${LIGHTBLUE}noddy bluetooth:enable${GRAY}: Enable bluetooth"
+            echo "${LIGHTBLUE}noddy bluetooth:disable${GRAY}: Disable bluetooth"
             echo "${NC}\n"
             ;;
         brew)
             echo "\n${WHITEBOLD}Homebrew Utilities:"
-            echo "${LIGHTBLUE}noddy brew:update${GRAY}: Install macOS software updates, update installed Ruby gems, Homebrew, npm, pip and their installed packages"
+            echo "${LIGHTBLUE}noddy brew:update${GRAY}: Install macOS software updates, then update Homebrew, npm and pip packages"
             echo "${NC}\n"
             ;;
         compress)
@@ -70,19 +71,26 @@ function usageList()
             ;;
         docker)
             echo "\n${WHITEBOLD}Docker Utilities:"
-            echo "${LIGHTBLUE}noddy d:install${GRAY}:"
+            echo "${LIGHTBLUE}noddy docker:list${GRAY}: List containers"
+            echo "${LIGHTBLUE}noddy docker:images${GRAY}: List images"
+            echo "${LIGHTBLUE}noddy docker:stop${GRAY}: Stop all containers"
+            echo "${LIGHTBLUE}noddy docker:remove${GRAY}: Remove all containers"
+            echo "${LIGHTBLUE}noddy docker:remove-images${GRAY}: Remove all images"
+            echo "${LIGHTBLUE}noddy docker:prune${GRAY}: Remove unused docker data"
+            echo "${LIGHTBLUE}noddy docker:start${GRAY}: Start Colima or Docker Desktop"
+            echo "${LIGHTBLUE}noddy docker:restart${GRAY}: Restart Colima or Docker Desktop"
             echo "${NC}\n"
             ;;
         general)
             echo "\n${WHITEBOLD}General Utilities:"
-            echo "${LIGHTBLUE}noddy update${GRAY}: Install OS X software updates, update installed Ruby gems, Homebrew, npm and their installed packages"
+            echo "${LIGHTBLUE}noddy update${GRAY}: Install macOS software updates, then update Homebrew, npm and pip packages"
             echo "${LIGHTBLUE}noddy upgrade${GRAY}: Upgrade noddy  to the latest version"
             echo "${LIGHTBLUE}noddy uninstall${GRAY}: Uninstall noddy "
             echo "${LIGHTBLUE}noddy lock${GRAY}: Lock"
             echo "${LIGHTBLUE}noddy restart${GRAY}: Restart OS X"
             echo "${LIGHTBLUE}noddy sleep${GRAY}: Sleep mode"
             echo "${LIGHTBLUE}noddy shutdown${GRAY}: Shutdown"
-            echo "${LIGHTBLUE}noddy presentation${GRAY}: Prepare MAC for presentation: minimize all apps, close browsers, send files from desktop and downloads to trash and set not disturb mode"
+            echo "${LIGHTBLUE}noddy presentation${GRAY}: Prepare MAC for presentation: minimize all apps, close browsers and send Desktop and Downloads to the Trash"
             echo "${LIGHTBLUE}noddy time${GRAY}: Show clock at top right position in Terminal/iTerm"
             echo "${LIGHTBLUE}noddy uptime${GRAY}: Get the time since last restart"
             echo "${LIGHTBLUE}noddy screensaver${GRAY}: Start screensaver"
@@ -154,12 +162,9 @@ function usageList()
             echo "${LIGHTBLUE}noddy ssh:sync:local ${LIGHTGREEN}X${GRAY}: Sync local folder with remote folder using rsync through SSH (download remote folder to local folder)"
             echo "${LIGHTBLUE}noddy ssh:sync:remote ${LIGHTGREEN}X${GRAY}: Path of the remote folder to sync from local folder (upload local folder to remote folder) "
             echo "${LIGHTBLUE}noddy ssh:upload ${LIGHTGREEN}X${GRAY}: Upload file to remote server through SSH - X = Path of the file to upload to the remote server "
-            echo "${LIGHTBLUE}noddy ssh:public-key ${LIGHTGREEN}X${GRAY}: Get public SSH key for local machine "
-            echo "${NC}\n"
-            ;;
-        tf)
-            echo "\n${WHITEBOLD}Terraform Utilities:"
-            echo "${LIGHTBLUE}noddy tf:p ${LIGHTGREEN}X${GRAY}: Terraform plan"
+            echo "${LIGHTBLUE}noddy ssh:public-key${GRAY}: Copy your public SSH key to the clipboard "
+            echo "${LIGHTBLUE}noddy ssh:list${GRAY}: List hosts defined in ~/.ssh/config and keys in ~/.ssh "
+            echo "${LIGHTBLUE}noddy ssh:connect ${LIGHTGREEN}X${GRAY}: Connect to a configured host - ${LIGHTGREEN}X = host name "
             echo "${NC}\n"
             ;;
         volume)

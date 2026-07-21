@@ -6,14 +6,14 @@ NC='\033[0m' # No Color
 main() {
 
     echo "Upgrading noddy ..."
-    rm /usr/local/bin/noddy
-    rm -rf /usr/local/bin/toyland
-    if [ -d ~/Downloads/toyland-update/ ]; then
-        rm -rf ~/Downloads/toyland-update/
-    fi
-    mkdir ~/Downloads/toyland-update/ && cd ~/Downloads/toyland-update/
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/anmolnagpal/toyland/master/toyland/tools/install)" && cd -
-    echo "${GREEN}noddy  has been updated to the latest version\n${NC}"
+
+    WORKDIR="$(mktemp -d)"
+    trap 'rm -rf "$WORKDIR"' EXIT
+
+    git clone https://github.com/clouddrove/noddy.git --depth 1 "$WORKDIR/noddy" || exit 1
+    sh "$WORKDIR/noddy/toyland/setup/install" || exit 1
+
+    echo "${GREEN}noddy has been updated to the latest version\n${NC}"
 
 }
 

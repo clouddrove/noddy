@@ -14,19 +14,20 @@ case "$fn" in
 
     # Upgrade noddy  to the latest version
     "upgrade")
+        # The command string is single-quoted so the echo does not itself run curl.
         if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}sh -c "$(curl -fsSL https://raw.githubusercontent.com/anmolnagpal/toyland/master/toyland/tools/update)"\n\n${NC}"
+            echo "${GREEN}"'sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/update)"'"\n\n${NC}"
         fi
-        sh -c "$(curl -fsSL https://raw.githubusercontent.com/anmolnagpal/toyland/master/toyland/tools/update)"
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/update)"
     ;;
 
 
     # Uninstall Mac  from your Mac
     "uninstall")
         if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}sh -c "$(curl -fsSL https://raw.githubusercontent.com/anmolnagpal/toyland/master/toyland/tools/uninstall)"\n\n${NC}"
+            echo "${GREEN}"'sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/uninstall)"'"\n\n${NC}"
         fi
-        sh -c "$(curl -fsSL https://raw.githubusercontent.com/anmolnagpal/toyland/master/toyland/tools/uninstall)"
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/uninstall)"
     ;;
 
 

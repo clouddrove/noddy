@@ -21,7 +21,7 @@ case "$fn" in
     "find:duplicated")
         
         # Check if brew install fdupes is installed brew install fdupes
-        if [ ! -f /usr/local/bin/fdupes ]; then
+        if ! command -v fdupes > /dev/null; then
             echo "${RED}fdupes not found ${NC}- ${GREEN}Installing dependency...\n\n${NC}"
             if [ "$echocommand" == "true" ]; then
                 echo "${GREEN}brew install fdupes\n\n${NC}"

@@ -4,11 +4,11 @@
 <p align="center" style="font-size: 1.2rem;"> Noddy Help DevOps in  macOS </p>
 <hr />
 
-| Command  | Description |:star: Now with plugins! You can check the plugins folder: [/noddy/plugins](https://github.com/anmolnagpal/noddy/tree/master/noddy/plugins)
+| Command  | Description |:star: Now with plugins! You can check the plugins folder: [/toyland/plugins](https://github.com/clouddrove/noddy/tree/master/toyland/plugins)
 
 _Contributions to add new plugins and keep improving the existing ones are welcome and very much appreciated!_
 
-![image](https://github.com/anmolnagpal/noddy/raw/master/demo/demo.gif)
+![image](https://github.com/clouddrove/noddy/raw/master/demo/demo.gif)
 
 The ultimate tool for devops to manage their noddy. It provides a huge set of command line commands that automate the usage of your noddyOS system.
 When you run a function, the executed command is displayed and that helps you memorize each of the Utilities for future usage.
@@ -18,10 +18,10 @@ When you run a function, the executed command is displayed and that helps you me
 ### Installation in 1 Simple Step - Including configuration wizard!
 
 Via curl
-> `sh -c "$(curl -fsSL https://raw.githubusercontent.com/anmolnagpal/noddy/master/devops-noddy/tools/install)"`
+> `sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/install)"`
 
 Via wget
-> `sh -c "$(wget https://raw.githubusercontent.com/anmolnagpal/noddy/master/devops-noddy/tools/install -O -)"`
+> `sh -c "$(wget https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/install -O -)"`
 
 Then, re-open your terminal client. You will be able to run all the commands listed below, for example:
 > `noddy help`
@@ -49,14 +49,14 @@ These are the requirements to be able to run all the commands (the dependencies/
 ### Update
 
 You can update noddy CLI to the latest version by running:
-> `sh -c "$(curl -fsSL https://raw.githubusercontent.com/anmolnagpal/devops-noddy/master/noddy/tools/update)"`
+> `sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/update)"`
 
 ---
 
 ### Uninstallation
 
 You can uninstall noddy CLI by running:
-> `sh -c "$(curl -fsSL https://raw.githubusercontent.com/anmolnagpal/devops-noddy/master/noddy/tools/uninstall)"`
+> `sh -c "$(curl -fsSL https://raw.githubusercontent.com/clouddrove/noddy/master/toyland/setup/uninstall)"`
 
 ---
 

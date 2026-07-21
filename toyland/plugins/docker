@@ -46,19 +46,42 @@ case "$fn" in
         fi
         docker system prune;
     ;;
+    # docker-machine reached end of life; on Apple Silicon the runtime is
+    # either Docker Desktop or Colima.
     "docker:start")
-        echo "Start docker machine..."
-        if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}docker machien start Dev;\n${NC}"
+        if command -v colima > /dev/null; then
+            echo "Starting Colima..."
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}colima start;\n${NC}"
+            fi
+            colima start;
+        elif [ -d /Applications/Docker.app ]; then
+            echo "Starting Docker Desktop..."
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}open -a Docker;\n${NC}"
+            fi
+            open -a Docker;
+        else
+            echo "${RED}No Docker runtime found${NC} - install one with ${GREEN}brew install colima${NC} or ${GREEN}brew install --cask docker${NC}"
+            exit 1
         fi
-        docker-machine start dev;
-        eval "$(docker-machine env dev)"
     ;;
-    "docker:machine-restart")
-        echo "Restart docker machine..."
-        if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}docker machien restart Dev;\n${NC}"
+    "docker:restart")
+        if command -v colima > /dev/null; then
+            echo "Restarting Colima..."
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}colima restart;\n${NC}"
+            fi
+            colima restart;
+        elif [ -d /Applications/Docker.app ]; then
+            echo "Restarting Docker Desktop..."
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}killall Docker && open -a Docker;\n${NC}"
+            fi
+            killall Docker; open -a Docker;
+        else
+            echo "${RED}No Docker runtime found${NC} - install one with ${GREEN}brew install colima${NC} or ${GREEN}brew install --cask docker${NC}"
+            exit 1
         fi
-        docker-machine restart dev;
     ;;
 esac

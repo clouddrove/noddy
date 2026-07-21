@@ -1,38 +1,107 @@
 #!/bin/sh
 
 #--------------------------------------------------------------------
-# FlightMode
+# Wifi Utilities
 #--------------------------------------------------------------------
+
+# Name of the Wi-Fi hardware port (en0 on most Macs, en1 on some models).
+# The old hardcoded ${_W_DEVICE} was never set anywhere, so wifi:enable and
+# wifi:disable silently operated on an empty device name.
+wifi_device() {
+    networksetup -listallhardwareports \
+        | awk '/^Hardware Port: (Wi-Fi|AirPort)$/{getline; print $2; exit}'
+}
+
+# The airport binary that this plugin used to call was deprecated in macOS 13
+# and removed in 14.4, so every reader here goes through system_profiler.
+wifi_current_ssid() {
+    system_profiler SPAirPortDataType 2>/dev/null \
+        | awk '/Current Network Information:/{getline; gsub(/^[ \t]+|:$/, "", $0); print; exit}'
+}
+
 case "$fn" in
+
     # Check wifi status
     "wifi:status")
-        /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I
+
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}system_profiler SPAirPortDataType\n\n${NC}"
+        fi
+
+        device=$(wifi_device)
+        if [ -z "$device" ]; then
+            echo "${RED}No Wi-Fi hardware port found${NC}"
+            exit 1
+        fi
+
+        echo "Device: ${device}"
+        echo "Power: $(networksetup -getairportpower ${device} | sed 's/.*: //')"
+        # Stop after the first interface; Macs can expose more than one.
+        system_profiler SPAirPortDataType 2>/dev/null \
+            | awk '/Current Network Information:/{flag=1; next} /Other Local Wi-Fi Networks:/{if (flag) exit} flag{sub(/^ {10}/, ""); print}'
     ;;
-    
+
     # Check available wifi networks
     "wifi:scan")
-        /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -s
+
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}system_profiler SPAirPortDataType\n\n${NC}"
+        fi
+
+        echo "Scanning for nearby networks..."
+        system_profiler SPAirPortDataType 2>/dev/null \
+            | awk '/Other Local Wi-Fi Networks:/{flag=1; next} flag && /^ {1,10}[a-zA-Z]/{exit} flag{sub(/^ {12}/, ""); print}'
     ;;
-    
+
     # Enable wifi
     "wifi:enable")
+
+        device=$(wifi_device)
+        if [ -z "$device" ]; then
+            echo "${RED}No Wi-Fi hardware port found${NC}"
+            exit 1
+        fi
+
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}networksetup -setairportpower ${GRAY}${device}${GREEN} on\n\n${NC}"
+        fi
+        networksetup -setairportpower ${device} on
         echo "${GREEN}Wifi enabled${NC}"
-        networksetup -setairportpower ${_W_DEVICE} on
     ;;
-    
+
     # Disable wifi
     "wifi:disable")
-        echo "${GREEN}Wifi disabled{NC}"
-        networksetup -setairportpower ${_W_DEVICE} off
+
+        device=$(wifi_device)
+        if [ -z "$device" ]; then
+            echo "${RED}No Wi-Fi hardware port found${NC}"
+            exit 1
+        fi
+
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}networksetup -setairportpower ${GRAY}${device}${GREEN} off\n\n${NC}"
+        fi
+        networksetup -setairportpower ${device} off
+        echo "${GREEN}Wifi disabled${NC}"
     ;;
-    
+
     # Show wifi password for current network
     "wifi:password")
-        if [ -z "$1" ]
-        then
-            ssid="`/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | awk '/ SSID/ {print substr($0, index($0, $2))}'`"
+
+        if [ ! -z "$firstParameter" -a "$firstParameter" != " " ]; then
+            ssid="$firstParameter"
         else
-            ssid=$1
+            ssid=$(wifi_current_ssid)
+        fi
+
+        if [ -z "$ssid" ]; then
+            echo "${RED}Not connected to a network${NC}"
+            echo "E.g.: wifi:password MyNetworkName"
+            exit 1
+        fi
+
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}security find-generic-password -D \"AirPort network password\" -a ${GRAY}${ssid}${GREEN} -gw\n\n${NC}"
         fi
         security find-generic-password -D "AirPort network password" -a "$ssid" -gw
     ;;

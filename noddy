@@ -17,8 +17,11 @@ MAC="$(dirname "$0")"
 #--------------------------------------------------------------------
 # Configuration
 #--------------------------------------------------------------------
-export cli_path="/usr/local/bin/"
-export plugins_path="/usr/local/bin/toyland/"
+# Homebrew prefix differs by architecture: /opt/homebrew on Apple Silicon,
+# /usr/local on Intel. Everything else is derived from it.
+export brew_prefix="$(brew --prefix 2>/dev/null || echo /usr/local)"
+export cli_path="${brew_prefix}/bin/"
+export plugins_path="${brew_prefix}/bin/toyland/"
 export php_cli=$(which php)
 export echocommand="false"
 export pref_editor="vim"
@@ -173,7 +176,13 @@ COMMANDS=(
     ansible:deploy
     terraform:check
     docker:list
+    docker:images
+    docker:remove-images
+    docker:stop
+    docker:remove
     docker:prune
+    docker:start
+    docker:restart
 )
 ## ---- END OF COMMANDS; Comment required for bash_completion------
 
@@ -208,16 +217,18 @@ fi
 # Plugins
 #--------------------------------------------------------------------
 
+source "$MAC/toyland/plugins/ansible"
+source "$MAC/toyland/plugins/bluetooth"
 source "$MAC/toyland/plugins/brew"
+source "$MAC/toyland/plugins/compress"
+source "$MAC/toyland/plugins/docker"
 source "$MAC/toyland/plugins/general"
 source "$MAC/toyland/plugins/git"
-source "$MAC/toyland/plugins/brew"
 source "$MAC/toyland/plugins/network"
 source "$MAC/toyland/plugins/performance"
 source "$MAC/toyland/plugins/search"
 source "$MAC/toyland/plugins/ssh"
-source "$MAC/toyland/plugins/xcode"
-source "$MAC/toyland/plugins/volume"
-source "$MAC/toyland/plugins/ansible"
-source "$MAC/toyland/plugins/docker"
 source "$MAC/toyland/plugins/terraform"
+source "$MAC/toyland/plugins/volume"
+source "$MAC/toyland/plugins/wifi"
+source "$MAC/toyland/plugins/xcode"

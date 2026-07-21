@@ -20,11 +20,18 @@ case "$fn" in
     # Show temperature, fan and battery statistics
     "temp")
         
-        if [ ! -f /usr/local/bin/istats ]; then
+        if ! command -v istats > /dev/null; then
+            echo "${RED}istats not found${NC}"
             read -r -p "Do you want to install the iStats utility? (https://github.com/Chris911/iStats) (Yes / No)" response
             case $response in
                 [yY][eE][sS]|[yY])
-                    sudo gem install iStats -n/usr/local/bin
+                    # macOS 12.3 removed the system Ruby, so install a Homebrew
+                    # Ruby first and use its gem rather than sudo gem.
+                    if ! command -v ruby > /dev/null || [ "$(command -v ruby)" = "/usr/bin/ruby" ]; then
+                        echo "Installing Ruby..."
+                        brew install ruby
+                    fi
+                    gem install iStats
                 ;;
                 *)
                     exit

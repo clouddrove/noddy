@@ -3,122 +3,116 @@
 # Colors
 GREEN='\033[0;32m'
 LIGHTGREEN='\033[1;32m'
-NC='\033[1;37m'
 LIGHTBLUE='\033[01;34m'
+RED='\033[1;31m'
 NC='\033[0m' # No Color
 
-# In directory
-PACKAGE_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Repository root: this script lives in toyland/setup/
+PACKAGE_DIRECTORY="$( cd "$( dirname "$0" )/../.." && pwd )"
 
 main() {
 
     echo "${LIGHTBLUE}================================================"
-    echo " noddy  Installer"
+    echo " noddy  Installer"
     echo "================================================${NC}\n"
 
-    git clone https://github.com/anmolnagpal/toyland.git --depth 1 && cd toyland
+    # When piped through curl there is no checkout around this script, so fetch one.
+    if [ ! -f "$PACKAGE_DIRECTORY/noddy" ]; then
+        if ! command -v git > /dev/null; then
+            echo "${RED}git is required to download noddy.${NC}"
+            exit 1
+        fi
+        WORKDIR="$(mktemp -d)"
+        trap 'rm -rf "$WORKDIR"' EXIT
+        echo "Downloading noddy..."
+        git clone https://github.com/clouddrove/noddy.git --depth 1 "$WORKDIR/noddy" > /dev/null 2>&1 \
+            || { echo "${RED}Could not clone https://github.com/clouddrove/noddy.git${NC}"; exit 1; }
+        PACKAGE_DIRECTORY="$WORKDIR/noddy"
+    fi
+
+    # Homebrew first: its prefix decides where noddy and every dependency land.
+    # Apple Silicon uses /opt/homebrew, Intel uses /usr/local.
+    if ! command -v brew > /dev/null; then
+        echo "Installing homebrew..."
+        echo "${GREEN}/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"\n${NC}"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+            if [ -x "$candidate" ]; then
+                eval "$($candidate shellenv)"
+                break
+            fi
+        done
+    fi
+
+    if ! command -v brew > /dev/null; then
+        echo "${RED}Homebrew is required but was not installed.${NC}"
+        exit 1
+    fi
+
+    BREW_PREFIX="$(brew --prefix)"
+    INSTALL_DIR="${BREW_PREFIX}/bin"
+    echo "Installing to ${INSTALL_DIR}\n"
 
     printf "${LIGHTGREEN}"
-    read -r -p "Would you like noddy to show you the commands that are run on each mac command? (Yes / No)" response
+    read -r -p "Would you like noddy to show you the commands that are run on each mac command? (Yes / No) " response
+    printf "${NC}"
+
+    if [ ! -d "$INSTALL_DIR" ]; then
+        echo "Creating ${INSTALL_DIR}..."
+        mkdir -p "$INSTALL_DIR" || { echo "${RED}Could not create ${INSTALL_DIR}${NC}"; exit 1; }
+    fi
+
+    rm -rf "${INSTALL_DIR}/toyland"
+    cp "$PACKAGE_DIRECTORY/noddy" "${INSTALL_DIR}/noddy"
+    cp -R "$PACKAGE_DIRECTORY/toyland" "${INSTALL_DIR}/toyland"
+    chmod +x "${INSTALL_DIR}/noddy"
+    chmod -R +x "${INSTALL_DIR}/toyland"
+
+    # Rewrite the installed copy, never the checkout.
     case $response in
         [yY][eE][sS]|[yY])
-            LC_CTYPE=C sed -i'' -e 's#echocommand="false"#echocommand="true"#g' "$PACKAGE_DIRECTORY/toyland/noddy"
+            LC_CTYPE=C sed -i'' -e 's#echocommand="false"#echocommand="true"#g' "${INSTALL_DIR}/noddy"
         ;;
         *)
         ;;
     esac
-    printf "${NC}"
 
     echo "${LIGHTGREEN}Please enter your favourite text editor (by entering the command that opens your favourite editor. i.e: nano):"
-    echo "${NC}Press enter without any value to keep default: vi"
+    echo "${NC}Press enter without any value to keep default: vim"
     read pref_editor
     if [ ! -z "$pref_editor" -a "$pref_editor" != " " ]; then
-        LC_CTYPE=C sed -i'' -e 's#pref_editor="vi"#pref_editor="${pref_Editor}"#g' "$PACKAGE_DIRECTORY/toyland/noddy"
+        LC_CTYPE=C sed -i'' -e "s#pref_editor=\"vim\"#pref_editor=\"${pref_editor}\"#g" "${INSTALL_DIR}/noddy"
     fi
 
-    if [ ! -d /usr/local/bin ]; then
-        echo "bin not found"
-        {
-            echo "creating bin directory..."
-            mkdir -p /usr/local/bin
-            } || {
-            echo "error in creating bin directory"
-            exit 1
-        }
-    fi
+    for pkg in git pv node python3 fdupes wget; do
+        if ! brew list --formula "$pkg" > /dev/null 2>&1; then
+            echo "Installing ${pkg}..."
+            echo "${GREEN}brew install ${pkg}\n${NC}"
+            brew install "$pkg"
+        fi
+    done
 
-    cp "$PACKAGE_DIRECTORY/toyland/noddy" /usr/local/bin/noddy
-    cp -r "$PACKAGE_DIRECTORY/toyland/noddy/" /usr/local/bin/noddy
-    chmod -R +x /usr/local/bin/noddy/*
-
-    if [ ! -f /usr/local/bin/brew ]; then
-        echo "Installing homebrew..."
-        echo "${GREEN}/usr/bin/ruby -e '\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)'\n${NC}"
-        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    fi
-
-    if [ ! -f /usr/local/bin/git ]; then
-        echo "Installing Git..."
-        echo "${GREEN}brew install git\n${NC}"
-        brew install git
-    fi
-
-    if [ ! -f /usr/local/bin/pv ]; then
-        echo "Installing pv (Pipe Viewer)..."
-        echo "${GREEN}brew install pv\n${NC}"
-        brew install pv
-    fi
-
-    if ! which node > /dev/null; then
-        echo "Installing node..."
-        echo "${GREEN}brew install node\n${NC}"
-        brew install node
-    fi
-
-    if [ ! -f /usr/local/bin/python ]; then
-        echo "Installing Python..."
-        echo "${GREEN}brew install python\n${NC}"
-        brew install python
-    fi
-
-    if [ ! -f /usr/local/bin/fdupes ]; then
-        echo "Installing fdupes..."
-        echo "${GREEN}brew install fdupes\n\n${NC}"
-        brew install fdupes
-    fi
-
-    if [ ! -f /usr/local/bin/wget ]; then
-        echo "Installing wget..."
-        printf "${GREEN}brew install wget\n${NC}"
-        brew install wget
-    fi
-
-    if [ ! -f /usr/local/bin/composer.phar ]; then
-        echo "Installing composer..."
-        echo "${GREEN}curl -sS https://getcomposer.org/installer | php\n${NC}"
-        curl -sS https://getcomposer.org/installer | php
-        echo "${GREEN}sudo mv composer.phar /usr/local/bin/\n${NC}"
-        sudo mv composer.phar /usr/local/bin/composer
-    fi
-
-    if [ ! -f /usr/local/bin/glances ]; then
+    if ! command -v glances > /dev/null; then
         printf "${LIGHTGREEN}"
-        read -r -p "Would you like to install Glances to access advanced information about the system (https://github.com/nicolargo/glances)? (Yes / No)" response
+        read -r -p "Would you like to install Glances to access advanced information about the system (https://github.com/nicolargo/glances)? (Yes / No) " response
+        printf "${NC}"
         case $response in
             [yY][eE][sS]|[yY])
                 echo "Installing Glances (https://github.com/nicolargo/glances)..."
-                echo "${GREEN}pip install glances\n${NC}"
-                pip install glances
+                # Homebrew Python is externally managed, so pip install fails here.
+                echo "${GREEN}brew install glances\n${NC}"
+                brew install glances
             ;;
             *)
             ;;
         esac
-        printf "${NC}"
     fi
 
-    if [ ! -f /usr/local/bin/speedtest-cli ]; then
+    if ! command -v fast > /dev/null; then
         printf "${LIGHTGREEN}"
-        read -r -p "Would you like to install Fast CLI to run internet speed tests from your command line (https://github.com/sindresorhus/fast-cli)? (Yes / No)" response
+        read -r -p "Would you like to install Fast CLI to run internet speed tests from your command line (https://github.com/sindresorhus/fast-cli)? (Yes / No) " response
+        printf "${NC}"
         case $response in
             [yY][eE][sS]|[yY])
                 echo "Installing Fast CLI (https://github.com/sindresorhus/fast-cli)..."
@@ -128,24 +122,33 @@ main() {
             *)
             ;;
         esac
-        printf "${NC}"
     fi
 
-    if [ ! -f /usr/local/bin/istats ]; then
+    if ! command -v istats > /dev/null; then
         printf "${LIGHTGREEN}"
-        read -r -p "Would you like to install iStats access information about your Mac temperature and fan speed? (Yes / No)" response
+        read -r -p "Would you like to install iStats to access information about your Mac temperature and fan speed? (Yes / No) " response
+        printf "${NC}"
         case $response in
             [yY][eE][sS]|[yY])
                 echo "Installing iStats..."
-                echo "${GREEN}sudo gem install iStats -n/usr/local/bin\n\n${NC}"
-                sudo gem install iStats -n/usr/local/bin
+                # macOS 12.3 removed the system Ruby, so iStats needs a Homebrew Ruby.
+                if ! brew list --formula ruby > /dev/null 2>&1; then
+                    echo "${GREEN}brew install ruby\n${NC}"
+                    brew install ruby
+                fi
+                echo "${GREEN}gem install iStats\n${NC}"
+                gem install iStats
             ;;
             *)
             ;;
         esac
-        printf "${NC}"
     fi
 
+    echo "\n${GREEN}noddy installed. Run 'noddy help' to get started.${NC}"
+    case ":$PATH:" in
+        *":${INSTALL_DIR}:"*) ;;
+        *) echo "${RED}${INSTALL_DIR} is not on your PATH.${NC} Add it in your shell config, then re-open your terminal." ;;
+    esac
 }
 
 main

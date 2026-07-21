@@ -29,13 +29,7 @@ KNOWN_DRIFT=(
     "tf:p" "tf:f" "tf:d"  # terraform stub arms with empty bodies
     "ansible:deploy"      # plugin uses a different label
     "ssh:list"            # documented in README but never implemented
-    "mysql" "mysql:cli" "mysql:list" "mysql:export-all" "mysql:export"
-    "mysql:import" "mysql:import-table" "mysql:create" "mysql:drop"
-    "mysql:duplicate" "mysql:dump"
-    "mamp:start" "mamp:stop" "mamp:restart"
-    "php:syntax" "php:info" "hosts:edit"
-    "dev:monitor" "dev:css:convert-to-scss"
-    "lamp" "webdev" "terminal" "web_utilities" "homebrew" "display"
+    "terminal" "homebrew" "display"
     "update" "brew"
     "ssh:connect"
 )

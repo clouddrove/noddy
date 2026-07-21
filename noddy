@@ -22,7 +22,6 @@ MAC="$(dirname "$0")"
 export brew_prefix="$(brew --prefix 2>/dev/null || echo /usr/local)"
 export cli_path="${brew_prefix}/bin/"
 export plugins_path="${brew_prefix}/bin/toyland/"
-export php_cli=$(which php)
 export echocommand="false"
 export pref_editor="vim"
 
@@ -57,15 +56,12 @@ COMMANDS=(
     general
     search
     network
-    lamp
     terraform
     ansible
     ssh
-    webdev
     performance
     terminal
     git
-    web_utilities
     homebrew
     xcode
     update
@@ -123,23 +119,6 @@ COMMANDS=(
     ip:public
     dhcp:renew
     dns:clear
-    mysql
-    mysql:cli
-    mysql:list
-    mysql:export-all
-    mysql:export
-    mysql:import
-    mysql:import-table
-    mysql:create
-    mysql:drop
-    mysql:duplicate
-    mysql:dump
-    mamp:start
-    mamp:stop
-    mamp:restart
-    php:syntax
-    php:info
-    hosts:edit
     ssh:download-file
     ssh:download-folder
     ssh:download-database
@@ -149,8 +128,6 @@ COMMANDS=(
     ssh:public-key
     ssh:list
     ssh:connect
-    dev:monitor
-    dev:css:convert-to-scss
     system
     temp
     memory

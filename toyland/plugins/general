@@ -152,10 +152,37 @@ END
     # Remove files older than X days in current folder
     "files:remove-older")
         if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}find . -ctime +${GRAY}${firstParameter}${GREEN} -print0 | xargs -0 -n1\n\n${NC}"
+            echo "${GREEN}find . -type f -mtime +${GRAY}${firstParameter}${GREEN} -print0 | xargs -0 rm -f\n\n${NC}"
         fi
-        echo "Removing files older than "$firstParameter" days..."
-        find . -ctime +$firstParameter -print0 | xargs -0 -n1
+        if [ -z "$firstParameter" ]; then
+            echo "Please specify an age in days"
+            echo "E.g.: files:remove-older 30"
+            exit 1
+        fi
+
+        # This used to pipe into "xargs -0 -n1" with no utility, which defaults
+        # to echo, so it announced a deletion and then deleted nothing. Show
+        # what matched and confirm before removing anything.
+        echo "Files older than ${firstParameter} days in $(pwd):"
+        find . -type f -mtime +"$firstParameter" -print
+        count=$(find . -type f -mtime +"$firstParameter" -print | wc -l | tr -d ' ')
+
+        if [ "$count" -eq 0 ]; then
+            echo "Nothing to remove."
+            exit 0
+        fi
+
+        echo "\n============================================="
+        read -r -p "Remove these ${count} file(s)? (Yes / No) " response
+        case $response in
+            [yY][eE][sS]|[yY])
+                find . -type f -mtime +"$firstParameter" -print0 | xargs -0 rm -f
+                echo "${GREEN}Removed ${count} file(s)${NC}"
+            ;;
+            *)
+                echo "Cancelled."
+            ;;
+        esac
     ;;
 
 

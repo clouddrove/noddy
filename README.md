@@ -110,7 +110,6 @@ You can uninstall noddy CLI by running:
 
 The following amazing projects have been integrated on the noddy script (all the integrated projects are optional and can be installed through the installation wizard):
 * Glances (https://github.com/nicolargo/glances)
-* MySQL CLI (https://github.com/dbcli/mycli)
 * fast-cli (https://github.com/sindresorhus/fast-cli)
 * iStats https://bjango.com/mac/istatmenus/
 

@@ -40,10 +40,29 @@ case "$fn" in
 
     # Lock Mac
     "lock")
+        # The old CGSession binary inside the User.menu bundle is gone on
+        # current macOS. Control-Command-Q is the documented Lock Screen
+        # shortcut and genuinely locks, unlike sleeping the display, which
+        # only locks if "require password after sleep" happens to be enabled.
         if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend\n\n${NC}"
+            echo "${GREEN}osascript -e 'tell application \"System Events\" to keystroke \"q\" using {control down, command down}'\n\n${NC}"
         fi
-        /System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend
+
+        if osascript -e 'tell application "System Events" to keystroke "q" using {control down, command down}' 2>/dev/null; then
+            exit 0
+        fi
+
+        # Sending keystrokes needs an Accessibility grant. Without it, the
+        # screensaver locks too, but only when screen lock is enabled.
+        if sysadminctl -screenLock status 2>&1 | grep -q "screenLock is off"; then
+            echo "${RED}Could not lock the screen.${NC}"
+            echo "Either grant your terminal access under ${LIGHTBLUE}System Settings > Privacy & Security > Accessibility${NC},"
+            echo "or enable screen lock with ${LIGHTBLUE}sysadminctl -screenLock immediate -password -${NC}"
+            exit 1
+        fi
+
+        echo "Accessibility access not granted; locking via the screensaver instead."
+        open -a "/System/Library/CoreServices/ScreenSaverEngine.app"
     ;;
 
 
@@ -270,10 +289,30 @@ END
 
     # Start screensaver
     "screensaver")
-        if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}open -a /System/Library/Frameworks/ScreenSaver.framework/Versions/A/Resources/ScreenSaverEngine.app\n\n${NC}"
+        # ScreenSaverEngine moved out of ScreenSaver.framework into
+        # CoreServices; keep the old path as a fallback for older systems.
+        saver="/System/Library/CoreServices/ScreenSaverEngine.app"
+        if [ ! -e "$saver" ]; then
+            saver="/System/Library/Frameworks/ScreenSaver.framework/Versions/A/Resources/ScreenSaverEngine.app"
         fi
-        open -a /System/Library/Frameworks/ScreenSaver.framework/Versions/A/Resources/ScreenSaverEngine.app
+
+        if [ ! -e "$saver" ]; then
+            echo "${RED}ScreenSaverEngine not found on this system${NC}"
+            exit 1
+        fi
+
+        if [ "$echocommand" == "true" ]; then
+            echo "${GREEN}open -a ${GRAY}${saver}\n\n${NC}"
+        fi
+
+        # The screensaver only locks if screen lock is enabled; say so rather
+        # than let it be mistaken for "lock".
+        if sysadminctl -screenLock status 2>&1 | grep -q "screenLock is off"; then
+            echo "${RED}Note:${NC} screen lock is off, so the screensaver will not lock this Mac."
+            echo "Use ${LIGHTBLUE}noddy lock${NC} to actually lock it."
+        fi
+
+        open -a "$saver"
     ;;
 
 

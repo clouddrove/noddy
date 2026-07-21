@@ -116,8 +116,16 @@ main() {
     install_completion "${BREW_PREFIX}/etc/bash_completion.d" "noddy.bash" "noddy"
     install_completion "${BREW_PREFIX}/share/fish/vendor_completions.d" "noddy.fish" "noddy.fish"
 
-    for pkg in git pv node python3 fdupes wget; do
-        if ! brew list --formula "$pkg" > /dev/null 2>&1; then
+    # Only what the plugins actually reach for: git for the git commands, pv
+    # for the tar:compress progress bar, wget for ip:public, fdupes for
+    # find:duplicated. node and python3 used to be installed here, but nothing
+    # needs them unless you opt into Fast CLI or Glances below, so they are
+    # installed by those branches instead.
+    #
+    # command -v rather than brew list, so a tool already on PATH from another
+    # source counts and Homebrew is never invoked for it.
+    for pkg in git pv wget fdupes; do
+        if ! command -v "$pkg" > /dev/null; then
             echo "Installing ${pkg}..."
             echo "${GREEN}brew install ${pkg}\n${NC}"
             brew install "$pkg"
@@ -143,6 +151,10 @@ main() {
         case $response in
             [yY][eE][sS]|[yY])
                 echo "Installing Fast CLI (https://github.com/sindresorhus/fast-cli)..."
+                if ! command -v npm > /dev/null; then
+                    echo "${GREEN}brew install node\n${NC}"
+                    brew install node
+                fi
                 echo "${GREEN}npm install --global fast-cli\n${NC}"
                 npm install --global fast-cli
             ;;

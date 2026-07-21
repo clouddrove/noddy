@@ -83,14 +83,27 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, macos-15-intel]
+    env:
+      # Without this, every brew install first runs a full brew update, which
+      # dominates the job. The runner images ship a recent Homebrew already.
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+      HOMEBREW_NO_ANALYTICS: "1"
+      HOMEBREW_NO_ENV_HINTS: "1"
     steps:
       - uses: actions/checkout@v7
 
       - name: Report runner architecture and Homebrew prefix
         run: |
-          echo "arch:         $(uname -m)"
-          echo "macOS:        $(sw_vers -productVersion)"
+          echo "arch:          $(uname -m)"
+          echo "macOS:         $(sw_vers -productVersion)"
           echo "brew --prefix: $(brew --prefix)"
+
+          # Which dependencies the installer will have to fetch. Anything
+          # already present costs nothing.
+          for pkg in git pv wget fdupes; do
+            printf '%-8s %s\n' "$pkg" "$(command -v $pkg || echo 'MISSING, will be installed')"
+          done
 
       - name: Run the installer unattended
         env:

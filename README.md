@@ -80,12 +80,15 @@ After that, you can update your noddy CLI configuration by editing the installed
 
 ### Requirements
 
-These are the requirements to be able to run all the commands (the dependencies/requirements are installed when you install noddy CLI for the first time):
+These are installed on first run, and only when they are not already on your PATH:
 
 * Homebrew
 * Git
-* Python
-* Pipe Viewer (pv)
+* Pipe Viewer (pv) - progress bar for `tar:compress`
+* wget - used by `ip:public`
+* fdupes - used by `find:duplicated`
+
+Node and Python are no longer installed up front. They are pulled in only if you opt into Fast CLI or Glances during setup.
 
 ---
 

@@ -159,6 +159,15 @@ jobs:
 
           ./.github/scripts/check-completions.sh "${BREW_PREFIX}/bin/noddy" "$COMPDIR"
 
+      # The bats suite runs here rather than on Linux: it drives macOS
+      # commands, and several tests assert on behaviour that only exists on a
+      # real macOS host.
+      - name: Install bats
+        run: brew list --formula bats-core > /dev/null 2>&1 || brew install bats-core
+
+      - name: Test suite
+        run: bats --print-output-on-failure test/
+
       - name: Read-only commands execute
         run: |
           BREW_PREFIX="$(brew --prefix)"

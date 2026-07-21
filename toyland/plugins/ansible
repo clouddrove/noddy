@@ -1,0 +1,64 @@
+#!/bin/sh
+
+#--------------------------------------------------------------------
+# Ansible Utilities
+#--------------------------------------------------------------------
+case "$fn" in
+
+    # Run an Ansible playbook, optionally limited to a set of tags.
+    #
+    # This used to hardcode one contributor's playbook directories, one per
+    # client project, which made the command useless to everyone else and
+    # published those project names. The playbook root is now taken from
+    # NODDY_ANSIBLE_HOME, or ~/.noddy if that sets it, and defaults to the
+    # current directory.
+    "ansible:deploy")
+
+        if ! command -v ansible-playbook > /dev/null; then
+            echo "${RED}ansible-playbook not found${NC} - install it with ${GREEN}brew install ansible${NC}"
+            exit 1
+        fi
+
+        noddy_config="$HOME/.noddy"
+        if [ -f "$noddy_config" ]; then
+            . "$noddy_config"
+        fi
+
+        playbook_root="${NODDY_ANSIBLE_HOME:-$(pwd)}"
+        playbook="$firstParameter"
+        tags="$secondParameter"
+
+        if [ -z "$playbook" ]; then
+            echo "Usage: noddy ansible:deploy <playbook> [tags]"
+            echo "  e.g. noddy ansible:deploy site.yml"
+            echo "       noddy ansible:deploy site.yml common"
+            echo ""
+            echo "Playbooks are resolved under ${playbook_root}"
+            echo "Set NODDY_ANSIBLE_HOME, or put it in ~/.noddy, to change that."
+            exit 1
+        fi
+
+        if [ ! -d "$playbook_root" ]; then
+            echo "${RED}Playbook directory not found: ${playbook_root}${NC}"
+            exit 1
+        fi
+
+        if [ ! -f "${playbook_root}/${playbook}" ]; then
+            echo "${RED}Playbook not found: ${playbook_root}/${playbook}${NC}"
+            exit 1
+        fi
+
+        if [ -n "$tags" ]; then
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}cd ${GRAY}${playbook_root}${GREEN} && ansible-playbook ${GRAY}${playbook}${GREEN} --tags=${GRAY}${tags}\n\n${NC}"
+            fi
+            cd "$playbook_root" && ansible-playbook "$playbook" --tags="$tags"
+        else
+            if [ "$echocommand" == "true" ]; then
+                echo "${GREEN}cd ${GRAY}${playbook_root}${GREEN} && ansible-playbook ${GRAY}${playbook}\n\n${NC}"
+            fi
+            cd "$playbook_root" && ansible-playbook "$playbook"
+        fi
+    ;;
+
+esac

@@ -19,12 +19,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install shellcheck
+      - name: Install shellcheck, zsh and fish
         run: |
-          if ! command -v shellcheck > /dev/null; then
-            sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          missing=""
+          for pkg in shellcheck zsh fish; do
+            command -v "$pkg" > /dev/null || missing="$missing $pkg"
+          done
+          if [ -n "$missing" ]; then
+            sudo apt-get update -qq
+            # shellcheck disable=SC2086
+            sudo apt-get install -y -qq $missing
           fi
-          shellcheck --version
+          shellcheck --version | head -2
+          echo "zsh  $(zsh --version)"
+          echo "fish $(fish --version)"
 
       - name: Syntax check every script
         run: |
@@ -62,16 +70,10 @@ jobs:
       - name: Command registries are consistent
         run: ./.github/scripts/check-registries.sh
 
-      - name: Completions parse the command list
-        run: |
-          count=$(awk '/^COMMANDS=\(/{flag=1; next}
-                       /END OF COMMANDS/{exit}
-                       flag{gsub(/[ \t]/,""); if (length($0) && $0 != ")") print}' noddy | wc -l)
-          echo "COMMANDS array holds $count entries"
-          if [ "$count" -lt 100 ]; then
-            echo "::error::Extraction returned $count commands; the awk range in the completions is probably broken"
-            exit 1
-          fi
+      # Linux is where fish gets exercised: it installs in seconds here, and
+      # the completions are shell logic with nothing macOS-specific in them.
+      - name: Completions agree with the command list
+        run: ./.github/scripts/check-completions.sh
 
   # The installer, the Homebrew prefix logic and every macOS-specific command
   # can only be exercised on real macOS. Both architectures are covered because
@@ -144,26 +146,18 @@ jobs:
           done
           exit $missing
 
-      - name: Completions resolve commands in zsh and bash
+      # Run against the installed copy and the installed completions, not the
+      # checkout, so this covers what the installer actually put on disk.
+      - name: Installed completions resolve commands
         run: |
           BREW_PREFIX="$(brew --prefix)"
-          export PATH="${BREW_PREFIX}/bin:$PATH"
+          COMPDIR="$(mktemp -d)"
 
-          zsh -f -c '
-            script=${commands[noddy]}
-            cmds=( ${(f)"$(awk "/^COMMANDS=\(/{flag=1; next}
-                                /END OF COMMANDS/{exit}
-                                flag{gsub(/[ \t]/, \"\"); if (length(\$0) \&\& \$0 != \")\") print}" $script)"} )
-            print "zsh resolved ${#cmds} commands"
-            (( ${#cmds} > 100 )) || exit 1
-          '
+          cp "${BREW_PREFIX}/share/zsh/site-functions/_noddy" "${COMPDIR}/_noddy"
+          cp "${BREW_PREFIX}/etc/bash_completion.d/noddy" "${COMPDIR}/noddy.bash"
+          cp "${BREW_PREFIX}/share/fish/vendor_completions.d/noddy.fish" "${COMPDIR}/noddy.fish"
 
-          bash -c "
-            source '${BREW_PREFIX}/etc/bash_completion.d/noddy'
-            n=\$(_noddy_commands | wc -l)
-            echo \"bash resolved \$n commands\"
-            [ \"\$n\" -gt 100 ]
-          "
+          ./.github/scripts/check-completions.sh "${BREW_PREFIX}/bin/noddy" "$COMPDIR"
 
       - name: Read-only commands execute
         run: |

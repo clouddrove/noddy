@@ -349,10 +349,27 @@ END
 
     # Eject all mounted volumes and disk
     "eject-all")
+        # The filter used to read "whose executable is true". Finder disks have
+        # no such property, so this raised "The variable executable is not
+        # defined. (-2753)" on every run and never ejected anything. The
+        # property that means "removable" is ejectable, which also protects
+        # the startup disk from being unmounted.
         if [ "$echocommand" == "true" ]; then
-            echo "${GREEN}osascript -e 'tell application 'Finder' to eject (every disk whose executable is true)'\n\n${NC}"
+            echo "${GREEN}osascript -e 'tell application \"Finder\" to eject (every disk whose ejectable is true)'\n\n${NC}"
         fi
-        osascript -e 'tell application "Finder" to eject (every disk whose executable is true)'
+
+        mounted=$(osascript -e 'tell application "Finder" to get name of every disk whose ejectable is true' 2>/dev/null)
+
+        if [ -z "$mounted" ]; then
+            echo "No ejectable volumes are mounted."
+            exit 0
+        fi
+
+        echo "Ejecting: ${mounted}"
+        if ! osascript -e 'tell application "Finder" to eject (every disk whose ejectable is true)' 2>/dev/null; then
+            echo "${RED}Could not eject.${NC} Grant your terminal access under System Settings > Privacy & Security > Automation."
+            exit 1
+        fi
     ;;
 
 

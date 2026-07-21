@@ -11,8 +11,21 @@
 #
 ###########################################################################
 
-# Mac CLI directory
-MAC="$(dirname "$0")"
+# Directory holding this script and its toyland/ payload.
+#
+# Resolve symlinks rather than using dirname "$0" directly: package managers
+# install the script into a versioned directory and symlink it onto PATH, and
+# the plain dirname then points at the symlink's directory, where toyland/
+# does not exist.
+MAC="$0"
+while [ -L "$MAC" ]; do
+    link=$(readlink "$MAC")
+    case "$link" in
+        /*) MAC="$link" ;;
+        *)  MAC="$(dirname "$MAC")/$link" ;;
+    esac
+done
+MAC="$(cd "$(dirname "$MAC")" && pwd)"
 
 #--------------------------------------------------------------------
 # Configuration

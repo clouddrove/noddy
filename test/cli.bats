@@ -19,8 +19,33 @@ setup() {
 @test "categories lists every registered category" {
     run "${NODDY}" categories
     [ "$status" -eq 0 ]
-    for c in ansible bluetooth brew compress docker general git network performance search ssh terraform volume wifi xcode; do
+
+    # Derived from the source rather than hardcoded, so removing a category
+    # does not leave a stale assertion behind.
+    local categories
+    categories=$(awk '/^noddyCategories=\(/{f=1;next} /^\)/{exit} f{gsub(/[ \t]/,""); if (length($0)) print}' \
+        "${NODDY_ROOT}/toyland/misc/help")
+
+    [ -n "$categories" ]
+
+    local c
+    for c in $categories; do
         [[ "$output" == *"$c"* ]]
+    done
+}
+
+@test "every category is invocable and prints its usage" {
+    local categories
+    categories=$(awk '/^noddyCategories=\(/{f=1;next} /^\)/{exit} f{gsub(/[ \t]/,""); if (length($0)) print}' \
+        "${NODDY_ROOT}/toyland/misc/help")
+
+    local c
+    for c in $categories; do
+        run bash -c "'${NODDY}' ${c} < /dev/null"
+        [ "$status" -eq 0 ] || {
+            echo "noddy ${c} exited ${status}; categories must be registered in COMMANDS"
+            return 1
+        }
     done
 }
 
